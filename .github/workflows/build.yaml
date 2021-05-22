@@ -1,8 +1,8 @@
 name: fmtconv Build
 
 on:
-  push:
-    branches: release
+  release:
+    types: [created]
 
 jobs:
   build:
@@ -47,3 +47,10 @@ jobs:
       with:
         name: fmtconv-release
         path: "build/win/fmtconv-release.zip"
+
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: "build/win/fmtconv-release.zip"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
