@@ -26,9 +26,24 @@ jobs:
       run: |
         cd build\win
         msbuild.exe fmtconv.sln /nologo /p:DeleteExistingFiles=True /p:platform="x64" /p:configuration="Release"
+        msbuild.exe fmtconv.sln /nologo /p:DeleteExistingFiles=True /p:platform="Win32" /p:configuration="Release"
+
+    - name: Package Release
+      shell: bash
+      run: |
+        cd "./build/win"
+        dir="release-$(git describe --tags --always)"
+        mkdir -p "$dir"/{x86,x64}
+        cp Releasex64/fmtconv.dll "$dir"/x64
+        cp Releasex64/fmtconv.pdb "$dir"/x64
+        cp ReleaseWin32/fmtconv.dll "$dir"/x86
+        cp ReleaseWin32/fmtconv.pdb "$dir"/x86
+        cp -a ../../doc "$dir"/
+        git clone https://github.com/AkarinVS/zip/
+        zip/zip.exe -9r fmtconv-release.zip "$dir"/
 
     - name: Upload artifact
       uses: actions/upload-artifact@v1.0.0
       with:
         name: fmtconv-release
-        path: "build/win"
+        path: "build/win/fmtconv-release.zip"
