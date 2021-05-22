@@ -114,6 +114,7 @@ private:
 	bool           operator == (const AvstpWrapper &other) const;
 	bool           operator != (const AvstpWrapper &other) const;
 
+	static AvstpWrapper instance;
 };	// class AvstpWrapper
 
 

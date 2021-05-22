@@ -82,10 +82,9 @@ Throws:
 ==============================================================================
 */
 
+AvstpWrapper AvstpWrapper::instance;
 AvstpWrapper &	AvstpWrapper::use_instance ()
 {
-	static AvstpWrapper instance;
-
 	return (instance);
 }
 
