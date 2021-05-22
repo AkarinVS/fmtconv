@@ -59,7 +59,7 @@ Name: dtor
 
 AvstpWrapper::~AvstpWrapper ()
 {
-#if defined (_MSC_VER)
+#if defined (_MSC_VER) && defined (USE_AVSTP)
 	::FreeLibrary (reinterpret_cast < ::HMODULE> (_dll_hnd));
 	_dll_hnd = 0;
 #endif
@@ -150,14 +150,14 @@ AvstpWrapper::AvstpWrapper ()
 ,	_avstp_enqueue_task_ptr (0)
 ,	_avstp_wait_completion_ptr (0)
 ,	_dll_hnd (
-#if defined (_MSC_VER)
+#if defined (_MSC_VER) && defined (USE_AVSTP)
 		AvstpFinder::find_lib ()
 #else
 		0
 #endif
 	)
 {
-#if defined (_MSC_VER)
+#if defined (_MSC_VER) && defined (USE_AVSTP)
 	if (_dll_hnd == 0)
 	{
 		::OutputDebugStringW (
@@ -167,7 +167,7 @@ AvstpWrapper::AvstpWrapper ()
 //		throw std::runtime_error ("Cannot find avstp.dll.");
 #endif
 		assign_fallback ();
-#if defined (_MSC_VER)
+#if defined (_MSC_VER) && defined (USE_AVSTP)
 	}
 
 	else
