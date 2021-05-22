@@ -1,0 +1,34 @@
+name: fmtconv Build
+
+on:
+  push:
+    branches: release
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1
+
+    - name: Install Windows 8.1 SDK
+      shell: powershell
+      run: |
+        Invoke-WebRequest -Method Get -Uri https://go.microsoft.com/fwlink/p/?LinkId=323507 -OutFile sdksetup.exe -UseBasicParsing
+        Start-Process -Wait sdksetup.exe -ArgumentList "/q", "/norestart", "/features", "OptionId.WindowsDesktopSoftwareDevelopmentKit", "OptionId.NetFxSoftwareDevelopmentKit"
+
+    - name: Build Solution
+      run: |
+        cd build\win
+        msbuild.exe fmtconv.sln /nologo /p:DeleteExistingFiles=True /p:platform="x64" /p:configuration="Release"
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: fmtconv-release
+        path: "build/win"
