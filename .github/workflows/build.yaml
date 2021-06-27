@@ -39,8 +39,8 @@ jobs:
         cp ReleaseWin32/fmtconv.dll "$dir"/x86
         cp ReleaseWin32/fmtconv.pdb "$dir"/x86
         cp -a ../../doc "$dir"/
-        git clone https://github.com/AkarinVS/zip/
-        zip/zip.exe -9r fmtconv-release.zip "$dir"/
+        git clone https://github.com/AkarinVS/exe/
+        exe/zip.exe -9r fmtconv-release.zip "$dir"/
 
     - name: Upload artifact
       uses: actions/upload-artifact@v1.0.0
