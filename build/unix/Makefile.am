@@ -1,10 +1,54 @@
 ACLOCAL_AMFLAGS = -I m4
 
-warningflags = -Wall -Wextra -Wshadow -Wno-expansion-to-defined -Wno-missing-field-initializers
+warningflags = \
+        -Wall \
+        -Wextra \
+        -Wshadow \
+        -Wunused \
+        -Wnull-dereference \
+        -Wvla \
+        -Wstrict-aliasing \
+        -Wuninitialized \
+        -Wunused-parameter \
+        -Wreorder \
+        -Wsign-compare \
+        -Wunreachable-code \
+        -Wconversion \
+        -Wno-sign-conversion \
+         $(COMPWARNFLAGS)
+
+if CLG
+
+# Clang
+warningflags += \
+        -Wshadow-all \
+        -Wshorten-64-to-32 \
+        -Wint-conversion \
+        -Wconditional-uninitialized \
+        -Wconstant-conversion \
+        -Wunused-private-field \
+        -Wbool-conversion \
+        -Wextra-semi \
+        -Wnullable-to-nonnull-conversion \
+        -Wno-unused-private-field \
+        -Wno-unused-command-line-argument
+# -Wzero-as-null-pointer-constant
+
+else
+
+# GCC
+warningflags += \
+        -Wredundant-decls \
+        -Wno-ignored-attributes \
+        -Wno-expansion-to-defined
+
+endif
+
+warnflagscpp =
 includeflags = -I$(srcdir)/../../src
-commonflags = $(DEBUGCFLAGS) $(MFLAGS) $(warningflags) $(includeflags)
-AM_CXXFLAGS = -std=$(CXXSTD) $(commonflags)
-AM_LDFLAGS  = $(PLUGINLDFLAGS)
+commoncflags = $(DEBUGCFLAGS) $(MFLAGS) $(warningflags) $(includeflags) $(STACKREALIGN)
+AM_CXXFLAGS  = -std=$(CXXSTD) $(commoncflags) $(warnflagscpp) $(EXTRA_CXXFLAGS)
+AM_LDFLAGS   = $(PLUGINLDFLAGS)
 
 lib_LTLIBRARIES = libfmtconv.la
 
@@ -52,8 +96,6 @@ libfmtconv_la_SOURCES =  \
         ../../src/conc/ObjPool.h \
         ../../src/conc/ObjPool.hpp \
         ../../src/ffft/def.h \
-        ../../src/ffft/DynArray.h \
-        ../../src/ffft/DynArray.hpp \
         ../../src/ffft/FFTReal.h \
         ../../src/ffft/FFTReal.hpp \
         ../../src/ffft/OscSinCos.h \
@@ -129,6 +171,8 @@ libfmtconv_la_SOURCES =  \
         ../../src/fmtcl/DiscreteFirCustom.h \
         ../../src/fmtcl/DiscreteFirInterface.cpp \
         ../../src/fmtcl/DiscreteFirInterface.h \
+        ../../src/fmtcl/Dither.cpp \
+        ../../src/fmtcl/Dither.h \
         ../../src/fmtcl/ErrDifBuf.cpp \
         ../../src/fmtcl/ErrDifBuf.h \
         ../../src/fmtcl/ErrDifBuf.hpp \
@@ -138,6 +182,7 @@ libfmtconv_la_SOURCES =  \
         ../../src/fmtcl/FilterResize.h \
         ../../src/fmtcl/fnc.cpp \
         ../../src/fmtcl/fnc.h \
+        ../../src/fmtcl/InterlacingType.h \
         ../../src/fmtcl/KernelData.cpp \
         ../../src/fmtcl/KernelData.h \
         ../../src/fmtcl/Mat3.h \
@@ -150,9 +195,14 @@ libfmtconv_la_SOURCES =  \
         ../../src/fmtcl/MatrixProc.cpp \
         ../../src/fmtcl/MatrixProc.h \
         ../../src/fmtcl/MatrixProc_macro.h \
+        ../../src/fmtcl/MatrixUtil.cpp \
+        ../../src/fmtcl/MatrixUtil.h \
         ../../src/fmtcl/MatrixWrap.h \
         ../../src/fmtcl/MatrixWrap.hpp \
+        ../../src/fmtcl/PicFmt.h \
         ../../src/fmtcl/PrimariesPreset.h \
+        ../../src/fmtcl/PrimUtil.cpp \
+        ../../src/fmtcl/PrimUtil.h \
         ../../src/fmtcl/Proxy.h \
         ../../src/fmtcl/Proxy.hpp \
         ../../src/fmtcl/ProxyRwCpp.h \
@@ -163,8 +213,11 @@ libfmtconv_la_SOURCES =  \
         ../../src/fmtcl/ReadWrapperFlt.hpp \
         ../../src/fmtcl/ReadWrapperInt.h \
         ../../src/fmtcl/ReadWrapperInt.hpp \
+        ../../src/fmtcl/ResamplePlaneData.h \
         ../../src/fmtcl/ResampleSpecPlane.cpp \
         ../../src/fmtcl/ResampleSpecPlane.h \
+        ../../src/fmtcl/ResampleUtil.cpp \
+        ../../src/fmtcl/ResampleUtil.h \
         ../../src/fmtcl/ResizeData.cpp \
         ../../src/fmtcl/ResizeData.h \
         ../../src/fmtcl/ResizeData.hpp \
@@ -212,6 +265,8 @@ libfmtconv_la_SOURCES =  \
         ../../src/fmtcl/TransOpSLog.h \
         ../../src/fmtcl/TransOpSLog3.cpp \
         ../../src/fmtcl/TransOpSLog3.h \
+        ../../src/fmtcl/TransUtil.cpp \
+        ../../src/fmtcl/TransUtil.h \
         ../../src/fmtcl/Vec3.h \
         ../../src/fmtcl/Vec3.hpp \
         ../../src/fmtcl/VoidAndCluster.cpp \
@@ -223,7 +278,7 @@ libfmtconv_la_SOURCES =  \
         ../../src/fstb/CpuId.cpp \
         ../../src/fstb/CpuId.h \
         ../../src/fstb/def.h \
-        ../../src/fstb/fnc.cpp \
+        ../../src/fstb/fnc_fstb.cpp \
         ../../src/fstb/fnc.h \
         ../../src/fstb/fnc.hpp \
         ../../src/fstb/SingleObj.h \

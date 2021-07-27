@@ -27,21 +27,14 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "conc/ObjPool.h"
-#include "fmtcl/BitBltConv.h"
-#include "fmtcl/ErrDifBuf.h"
-#include "fmtcl/ErrDifBufFactory.h"
-#include "fmtcl/SplFmt.h"
-#include "fstb/ArrayAlign.h"
+#include "fmtcl/Dither.h"
 #include "vsutl/FilterBase.h"
 #include "vsutl/NodeRefSPtr.h"
 #include "vsutl/PlaneProcCbInterface.h"
 #include "vsutl/PlaneProcessor.h"
 #include "VapourSynth.h"
 
-#include <array>
 #include <memory>
-#include <vector>
 
 
 
@@ -84,255 +77,8 @@ protected:
 
 private:
 
-	static const int  MAX_NBR_PLANES =     3;
-	static const int  PAT_WIDTH      =    32; // Number of pixels for halftone dithering
-	static const int  PAT_PERIOD     =     4; // Must be a power of 2 (because cycled with & as modulo)
-	static const int  AMP_BITS       =     5; // Bit depth of the amplitude fractionnal part. The whole thing is 7 bits, and we need a few bits for the integer part.
-	static const int  ERR_RES        =    24; // Resolution (bits) of the temporary data for error diffusion when source bitdepth is not high enough (relative to the destination bitdepth) to guarantee an accurate error diffusion.
-	static const int  MAX_UNK_WIDTH  = 65536; // Maximum width (pixels) for variable formats
-
-	enum DMode
-	{
-		DMode_ROUND_ALIAS = -1,
-		DMode_BAYER = 0,
-		DMode_ROUND,      // 1
-		DMode_FAST,       // 2
-		DMode_FILTERLITE, // 3
-		DMode_STUCKI,     // 4
-		DMode_ATKINSON,   // 5
-		DMode_FLOYD,      // 6
-		DMode_OSTRO,      // 7
-		DMode_VOIDCLUST,  // 8
-
-		DMode_NBR_ELT
-	};
-
-	class SclInf
-	{
-	public:
-		fmtcl::BitBltConv::ScaleInfo
-		               _info;
-		fmtcl::BitBltConv::ScaleInfo *   // 0 if _info is not used.
-		               _ptr = 0;
-	};
-
-	typedef	int16_t	PatRow [PAT_WIDTH];  // Contains data in [-128; +127]
-	typedef	PatRow	PatData [PAT_WIDTH]; // [y] [x]
-	typedef	fstb::ArrayAlign <PatData, PAT_PERIOD, 16>	PatDataArray;
-
-	class SegContext
-	{
-	public:
-		inline         SegContext ();
-		inline const PatRow &
-		               extract_pattern_row () const;
-		const PatData* _pattern_ptr;           // Ordered dithering
-		uint32_t       _rnd_state;             // Anything excepted fast mode
-		const fmtcl::BitBltConv::ScaleInfo *   // Float processing
-		               _scale_info_ptr;
-		fmtcl::ErrDifBuf *                     // Error diffusion
-		               _ed_buf_ptr;
-		int            _y;                     // Ordered dithering and error diffusion
-	};
-
 	const ::VSFormat &
 	               get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSFormat &fmt_src) const;
-
-	void           build_dither_pat ();
-	void           build_dither_pat_round ();
-	void           build_dither_pat_bayer ();
-	void           build_dither_pat_void_and_cluster (int w);
-	void           build_next_dither_pat ();
-	void           copy_dither_pat_rotate (PatData &dst, const PatData &src, int angle);
-	void           init_fnc_fast ();
-	void           init_fnc_ordered ();
-	void           init_fnc_errdiff ();
-
-	void           dither_plane (fmtcl::SplFmt dst_fmt, int dst_res, uint8_t *dst_ptr, int dst_stride, fmtcl::SplFmt src_fmt, int src_res, const uint8_t *src_ptr, int src_stride, int w, int h, const fmtcl::BitBltConv::ScaleInfo &scale_info, const PatData &pattern, uint32_t rnd_state);
-
-	template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
-	void           process_seg_fast_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &/*ctx*/) const;
-	template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
-	void           process_seg_fast_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
-
-#if (fstb_ARCHI == fstb_ARCHI_X86)
-	template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, int SRC_BITS>
-	void           process_seg_fast_int_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &/*ctx*/) const;
-	template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT>
-	void           process_seg_fast_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
-#endif
-
-	template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
-	void           process_seg_ord_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
-	template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
-	void           process_seg_ord_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
-
-#if (fstb_ARCHI == fstb_ARCHI_X86)
-	template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT, int SRC_BITS>
-	void           process_seg_ord_int_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
-	template <bool S_FLAG, fmtcl::SplFmt DST_FMT, int DST_BITS, fmtcl::SplFmt SRC_FMT>
-	void           process_seg_ord_flt_int_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
-#endif
-
-	template <bool S_FLAG, class ERRDIF>
-	void           process_seg_errdif_int_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
-	template <bool S_FLAG, class ERRDIF>
-	void           process_seg_errdif_flt_int_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
-
-	static inline void
-	               generate_rnd (uint32_t &state);
-	static inline void
-	               generate_rnd_eol (uint32_t &state);
-
-	template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
-	static inline void
-	               quantize_pix_int (DST_TYPE *dst_ptr, const SRC_TYPE *src_ptr, SRC_TYPE &src_raw, int x, int &err, uint32_t &rnd_state, int ampe_i, int ampn_i);
-	template <bool S_FLAG, class DST_TYPE, int DST_BITS, class SRC_TYPE>
-	static inline void
-	               quantize_pix_flt (DST_TYPE *dst_ptr, const SRC_TYPE *src_ptr, SRC_TYPE &src_raw, int x, float &err, uint32_t &rnd_state, float ampe_f, float ampn_f, float mul, float add);
-
-	template <class DT, int DB, class ST, int SB, int EL>
-	class ErrDifAddParam
-	{
-	public:
-		typedef DT DstType;
-		typedef ST SrcType;
-		static const int  DST_BITS      = DB;
-		static const int  SRC_BITS      = SB;
-		static const int  NBR_ERR_LINES = EL;
-	};
-
-	template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
-	class DiffuseFloydSteinberg
-	:	public ErrDifAddParam <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS, 1>
-	{
-	public:
-		template <int DIR>
-		static fstb_FORCEINLINE void
-		               diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, SRC_TYPE src_raw);
-		template <int DIR>
-		static fstb_FORCEINLINE void
-		               diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, SRC_TYPE src_raw);
-		template <typename EB>
-		static fstb_FORCEINLINE void
-		               prepare_next_line (EB *err_ptr);
-	private:
-		template <int DIR, typename ET, typename EB>
-		static fstb_FORCEINLINE void
-		               spread_error (ET e1, ET e3, ET e5, ET e7, ET &err_nxt0, EB *err0_ptr);
-	};
-
-	template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
-	class DiffuseFilterLite
-	:	public ErrDifAddParam <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS, 1>
-	{
-	public:
-		template <int DIR>
-		static fstb_FORCEINLINE void
-		               diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, SRC_TYPE src_raw);
-		template <int DIR>
-		static fstb_FORCEINLINE void
-		               diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, SRC_TYPE src_raw);
-		template <typename EB>
-		static fstb_FORCEINLINE void
-		               prepare_next_line (EB *err_ptr);
-	private:
-		template <int DIR, typename ET, typename EB>
-		static fstb_FORCEINLINE void
-		               spread_error (ET e1, ET e2, ET &err_nxt0, EB *err0_ptr);
-	};
-
-	template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
-	class DiffuseStucki
-	:	public ErrDifAddParam <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS, 2>
-	{
-	public:
-		template <int DIR>
-		static fstb_FORCEINLINE void
-		               diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, SRC_TYPE src_raw);
-		template <int DIR>
-		static fstb_FORCEINLINE void
-		               diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, SRC_TYPE src_raw);
-		template <typename EB>
-		static fstb_FORCEINLINE void
-		               prepare_next_line (EB *err_ptr);
-	private:
-		template <int DIR, typename ET, typename EB>
-		static fstb_FORCEINLINE void
-		               spread_error (ET e1, ET e2, ET e4, ET e8, ET &err_nxt0, ET &err_nxt1, EB *err0_ptr, EB *err1_ptr);
-	};
-
-	template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
-	class DiffuseAtkinson
-	:	public ErrDifAddParam <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS, 2>
-	{
-	public:
-		template <int DIR>
-		static fstb_FORCEINLINE void
-		               diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, SRC_TYPE src_raw);
-		template <int DIR>
-		static fstb_FORCEINLINE void
-		               diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, SRC_TYPE src_raw);
-		template <typename EB>
-		static fstb_FORCEINLINE void
-		               prepare_next_line (EB *err_ptr);
-	private:
-		template <int DIR, typename ET, typename EB>
-		static fstb_FORCEINLINE void
-		               spread_error (ET e1, ET &err_nxt0, ET &err_nxt1, EB *err0_ptr, EB *err1_ptr);
-	};
-
-	class DiffuseOstromoukhovBase
-	{
-	public:
-		struct TableEntry
-		{
-			int            _c0;
-			int            _c1;
-			int            _c2;        // Actually not used
-			int            _sum;
-			float          _inv_sum;   // Possible optimization: store 1/_c0 and 1/_c1 instead of this field.
-		};
-		static const int  T_BITS = 8;
-		static const int  T_LEN  = 1 << T_BITS;
-		static const int  T_MASK = T_LEN - 1;
-
-		static const TableEntry
-		               _table [T_LEN];
-	};
-
-	template <int DST_BITS, int SRC_BITS>
-	class DiffuseOstromoukhovBase2
-	:	public DiffuseOstromoukhovBase
-	{
-	public:
-		template <class SRC_TYPE>
-		static inline int
-		               get_index (SRC_TYPE src_raw);
-		static inline int
-		               get_index (float src_raw);
-	};
-
-	template <class DST_TYPE, int DST_BITS, class SRC_TYPE, int SRC_BITS>
-	class DiffuseOstromoukhov
-	:	public ErrDifAddParam <DST_TYPE, DST_BITS, SRC_TYPE, SRC_BITS, 1>
-	,	public DiffuseOstromoukhovBase2 <DST_BITS, SRC_BITS>
-	{
-	public:
-		template <int DIR>
-		static fstb_FORCEINLINE void
-		               diffuse (int err, int &err_nxt0, int &err_nxt1, int16_t *err0_ptr, int16_t *err1_ptr, SRC_TYPE src_raw);
-		template <int DIR>
-		static fstb_FORCEINLINE void
-		               diffuse (float err, float &err_nxt0, float &err_nxt1, float *err0_ptr, float *err1_ptr, SRC_TYPE src_raw);
-		template <typename EB>
-		static fstb_FORCEINLINE void
-		               prepare_next_line (EB *err_ptr);
-	private:
-		template <int DIR, typename ET, typename EB>
-		static fstb_FORCEINLINE void
-		               spread_error (ET e1, ET e2, ET e3, ET &err_nxt0, EB *err0_ptr);
-	};
 
 	vsutl::NodeRefSPtr
 	               _clip_src_sptr;
@@ -342,42 +88,13 @@ private:
 
 	vsutl::PlaneProcessor
 	               _plane_processor;
-	fmtcl::SplFmt  _splfmt_src;
-	fmtcl::SplFmt  _splfmt_dst;
 
-	std::array <SclInf, MAX_NBR_PLANES>
-	               _scale_info_arr;
-	bool           _upconv_flag;
-	bool           _sse2_flag;
-	bool           _avx2_flag;
-	bool           _full_range_in_flag;
-	bool           _full_range_out_flag;
+	bool           _full_range_in_flag  = false;
+	bool           _full_range_out_flag = false;
+	bool           _range_def_flag      = false;
 
-	int            _dmode;
-	double         _ampo;
-	double         _ampn;
-	bool           _dyn_flag;
-	bool           _static_noise_flag;
-	int            _pat_size;        // Must be a divisor of PAT_WIDTH
-
-	int            _ampo_i;          // [0 ;  127], 1.0 = 1 << AMP_BITS
-	int            _ampn_i;          // [0 ;  127], 1.0 = 1 << AMP_BITS
-	int            _ampe_i;          // [0 ; 2047], 1.0 = 256
-	float          _ampe_f;
-	float          _ampn_f;
-	bool           _errdif_flag;     // Indicates a dithering method using error diffusion.
-	bool           _simple_flag;     // Simplified implementation for ampo == 1 and ampn == 0
-	PatDataArray   _dither_pat_arr;  // Contains levels for ordered dithering
-
-	conc::ObjPool <fmtcl::ErrDifBuf>
-						_buf_pool;
-	std::unique_ptr <fmtcl::ErrDifBufFactory>
-	               _buf_factory_uptr;
-
-	void (ThisType::*
-	               _process_seg_int_int_ptr) (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
-	void (ThisType::*
-	               _process_seg_flt_int_ptr) (uint8_t *dst_ptr, const uint8_t *src_ptr, int w, SegContext &ctx) const;
+	std::unique_ptr <fmtcl::Dither>
+	               _engine_uptr;
 
 
 
@@ -387,7 +104,9 @@ private:
 
 	               Bitdepth ()                               = delete;
 	               Bitdepth (const Bitdepth &other)          = delete;
+	               Bitdepth (Bitdepth &&other)               = delete;
 	Bitdepth &     operator = (const Bitdepth &other)        = delete;
+	Bitdepth &     operator = (Bitdepth &&other)             = delete;
 	bool           operator == (const Bitdepth &other) const = delete;
 	bool           operator != (const Bitdepth &other) const = delete;
 

@@ -164,7 +164,7 @@ public:
 				const int      h = _vsapi.getFrameHeight (dst_ptr, plane);
 				if (_vi_out.format->bytesPerSample == 2)
 				{
-					const uint16_t    fill_cst = 1 << (bits - 1);
+					const uint16_t    fill_cst = uint16_t (1 << (bits - 1));
 					for (int y = 0; y < h; ++y)
 					{
 						for (int x = 0; x < w; ++x)
@@ -555,6 +555,9 @@ VS_EXTERNAL_API (void) VapourSynthPluginInit (::VSConfigPlugin config_fnc, ::VSR
 		"staticnoise:int:opt;"
 		"cpuopt:int:opt;"
 		"patsize:int:opt;"
+		"tpdfo:int:opt;"
+		"tpdfn:int:opt;"
+		"corplane:int:opt;"
 		, &vsutl::Redirect <fmtc::Bitdepth>::create, 0, plugin_ptr
 	);
 

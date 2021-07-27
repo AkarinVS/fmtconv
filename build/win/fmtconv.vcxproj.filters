@@ -177,12 +177,6 @@
     <ClInclude Include="..\..\src\ffft\def.h">
       <Filter>ffft</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\ffft\DynArray.h">
-      <Filter>ffft</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\ffft\DynArray.hpp">
-      <Filter>ffft</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\ffft\FFTReal.h">
       <Filter>ffft</Filter>
     </ClInclude>
@@ -532,6 +526,30 @@
     <ClInclude Include="..\..\src\fmtcl\TransOpHlg.h">
       <Filter>fmtcl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\fmtcl\Dither.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\fmtcl\MatrixUtil.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\fmtcl\PicFmt.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\fmtcl\PrimUtil.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\fmtcl\TransUtil.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\fmtcl\ResampleUtil.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\fmtcl\ResamplePlaneData.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\fmtcl\InterlacingType.h">
+      <Filter>fmtcl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\fmtc\Bitdepth.cpp">
@@ -561,7 +579,7 @@
     <ClCompile Include="..\..\src\vsutl\PlaneProcessor.cpp">
       <Filter>vsutl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\fstb\fnc.cpp">
+    <ClCompile Include="..\..\src\fstb\fnc_fstb.cpp">
       <Filter>fstb</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\AvstpFinder.cpp" />
@@ -756,5 +774,24 @@
     <ClCompile Include="..\..\src\fmtcl\TransOpHlg.cpp">
       <Filter>fmtcl</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\fmtcl\Dither.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\fmtcl\MatrixUtil.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\fmtcl\PrimUtil.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\fmtcl\TransUtil.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\fmtcl\ResampleUtil.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\unix\configure.ac" />
+    <None Include="..\unix\Makefile.am" />
   </ItemGroup>
 </Project>

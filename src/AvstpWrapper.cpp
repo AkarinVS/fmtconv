@@ -22,6 +22,11 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 
 
+// Define this macro to output error messages
+#undef AvstpWrapper_DEBUG_VERBOSE
+
+
+
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 #if defined (_MSC_VER)
@@ -159,10 +164,12 @@ AvstpWrapper::AvstpWrapper ()
 #if defined (_MSC_VER) && defined (USE_AVSTP)
 	if (_dll_hnd == 0)
 	{
+#if defined (AvstpWrapper_DEBUG_VERBOSE)
 		::OutputDebugStringW (
 			L"AvstpWrapper: cannot find avstp.dll."
 			L"Usage restricted to single threading.\n"
 		);
+#endif
 //		throw std::runtime_error ("Cannot find avstp.dll.");
 #endif
 		assign_fallback ();
