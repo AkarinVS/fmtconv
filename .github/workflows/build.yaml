@@ -33,11 +33,17 @@ jobs:
       run: |
         cd "./build/win"
         dir="release-$(git describe --tags --always)"
-        mkdir -p "$dir"/{x86,x64}
-        cp Releasex64/fmtconv.dll "$dir"/x64
-        cp Releasex64/fmtconv.pdb "$dir"/x64
-        cp ReleaseWin32/fmtconv.dll "$dir"/x86
-        cp ReleaseWin32/fmtconv.pdb "$dir"/x86
+        for arch in x64 Win32; do
+          for d in */Release${arch}; do
+            echo "d=$d"
+            dirname="$dir/$arch/$(dirname $d)"
+            echo "dirname=$dirname"
+            mkdir -p "$dirname"
+            for f in "$d"/*.dll "$d"/*.pdb; do
+              cp "$f" "$dirname" || true
+            done
+          done
+        done
         cp -a ../../doc "$dir"/
         git clone https://github.com/AkarinVS/exe/
         exe/zip.exe -9r fmtconv-release.zip "$dir"/
