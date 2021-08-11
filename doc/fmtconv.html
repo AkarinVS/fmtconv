@@ -232,68 +232,24 @@ make install</pre>
 <p>You can add some options to the <code>configure</code> command:</p>
 <ul>
 <li><code>--enable-debug</code> to activate debugging code</li>
-<li><code>--enable-clang</code> to use Clang instead of the default compiler, usually GCC</li>
+<li><code>--enable-clang</code> to use Clang instead of the default compiler which is usually GCC</li>
 </ul>
-
-<h4>GCC</h4>
-
-<p>Here are the steps needed to compile without the autotools.
-From the <code>src</code> directory, compile and link all these files with
-<code>g++</code>:</p>
-
-<pre class="src">main.cpp
-AvstpWrapper.cpp
-fmtc/*.cpp
-fmtcl/*.cpp
-fstb/*.cpp
-vsutl/*.cpp</pre>
-
-<p>Add <code>AvstpFinder.cpp</code> on Windows.
-Use the following options (on a single line):</p>
-
-<pre class="src">-std=c++14 -shared -fabi-version=6 -msse2 -mcx16 -O3 -DNDEBUG -I.
--Wall -Wextra -Wno-unused-parameter -Wno-unused-result -Wno-missing-field-initializers -Wshadow
--Wno-unused-private-field</pre>
-
-<p>You’ll need to replace <code>-msse2</code> with <code>-mavx2</code> for all
-the <code>*.cpp</code> files containing <code>avx2</code> in their name.
-Same with <code>-mavx</code> and <code>avx</code> files.</p>
-
-<p>Be careful, some files located in different directories have the same name.
-To avoid conflicts and missing symbols, keep the source directory structure for
-your object files.</p>
-
-<p>People have reported that the <code>-fPIC</code> option was sometimes
-needed.</p>
-
-<p>The <code>-mcx16</code> option is only need for 64-bit builds.
-This means that they won’t work on
-<a href="http://en.wikipedia.org/wiki/X86-64#Older_implementations">early AMD64
-CPUs</a> and
-<a href="http://www.pcworld.com/article/2058683/new-windows-8-1-requirements-strand-some-users-on-windows-8.html">allegedly</a>
-on a few Intel-based motherboards where the CMPXCHG16B instruction doesn’t work
-for some reason.</p>
-
-<p>To compile a debug version, replace <code>-O3 -DNDEBUG</code> with
-<code>-g</code>.</p>
-
-<p>Link with <code>-latomic -lpthread</code>.</p>
-
-<p>With MinGW, it seems you will need a specific MinGW-64 build supporting
-C++14 threading (not tested here yet, please report if you find something
-useful).</p>
 
 <h2><a id="description"></a>III) Filters description</h2>
 
 <h3><a id="bitdepth"></a>bitdepth</h3>
 
-<pre class="proto">fmtc.bitdepth (
+<table class="n" width="100%">
+<tr><th class="p">Vapoursynth</th><th class="p">Avisynth+</th></tr>
+<tr>
+<td class="n"><pre class="proto">
+fmtc.bitdepth (
 	clip       : clip      ;
 	csp        : int  : opt;
 	bits       : int  : opt;
 	flt        : int  : opt;
 	planes     : int[]: opt; (all)
-	fulls      : int  : opt; (depends on the colorspace)
+	fulls      : int  : opt; (depends)
 	fulld      : int  : opt; (fulls)
 	dmode      : int  : opt; (3)
 	ampo       : float: opt; (1)
@@ -305,8 +261,28 @@ useful).</p>
 	tpdfo      : int  : opt; (0)
 	tpdfn      : int  : opt; (0)
 	corplane   : int  : opt; (0)
-)
-</pre>
+)</pre></td>
+<td class="n"><pre class="proto">fmtc_bitdepth (
+	clip   c,
+
+	int    bits (-1),
+	bool   flt (undefined),
+	string planes ("all"),
+	bool   fulls (depends),
+	bool   fulld (fulls),
+	int    dmode (3),
+	float  ampo (1),
+	float  ampn (0),
+	bool   dyn (false),
+	bool   staticnoise (false),
+	int    cpuopt (-1),
+	int    patsize (32),
+	bool   tpdfo (false),
+	bool   tpdfn (false),
+	bool   corplane (false)
+)</pre></td>
+</tr>
+</table>
 
 <p>Bitdepth conversion with optional dithering.</p>
 
@@ -331,6 +307,10 @@ each run.</p>
 <p>The internal processing is done in floating point as soon as the input is
 floating point or a range conversion is detected.</p>
 
+<p>The <code>_ColorRange</code> frame property is set if at least one of the
+<var>fulls</var> or <var>fulld</var> parameter has been explicitely
+defined.</p>
+
 <h4>Parameters</h4>
 
 <p class="var">clip</p>
@@ -343,7 +323,8 @@ Supported input formats:</p>
 </ul>
 
 <p class="var">csp</p>
-<p>The destination format, as Vapoursynth constant.
+<p><span class="host">Vapoursynth</span> The destination format, as
+a Vapoursynth constant.
 Can only change the bitdepth and the data type (integer or float).
 Supported destination colorspaces are the same as for the input clip.</p>
 
@@ -354,6 +335,8 @@ the full format.
 When there is no ambiguity between bitdepth and data type, the data type is
 automatically selected depending on the bitdepth.
 For example, specifying 32 bits is enough to switch the output to float.</p>
+<p><span class="host">Avisynth+</span> A negative value means that the
+parameter is left undefined.</p>
 
 <p class="var">flt</p>
 <p>Set it to 1 to convert to float, and to 0 for integer data.
@@ -361,8 +344,19 @@ As long as only 32-bit floating point data is supported, you don’t need to
 specify the bitdepth for a float conversion.</p>
 
 <p class="var">planes</p>
-<p>A list of planes to process (0 to 2), in any order.
+<p>A list of planes to process.
 The content of an unprocessed plane should be considered as garbage.</p>
+<p><span class="host">Vapoursynth</span> Planes as index (0 to 2), in any order.</p>
+<p><span class="host">Avisynth+</span> This is a string made of concatenated
+substrings for each plane, in any order.
+The planes are identified by their index, as well as the following aliases:</p>
+<table>
+<tr><td><code>"0"</code>, <code>"y"</code>, <code>"r"</code></td><td>Y or red</td></tr>
+<tr><td><code>"1"</code>, <code>"u"</code>, <code>"g"</code></td><td>U or green</td></tr>
+<tr><td><code>"2"</code>, <code>"v"</code>, <code>"b"</code></td><td>V or blue</td></tr>
+<tr><td><code>"3"</code>, <code>"a"</code></td><td>Alpha channel</td></tr>
+<tr><td><code>"all"</code></td><td>All the planes</td></tr>
+</table>
 
 <p class="var">fulls, fulld</p>
 <p>Indicates if the clip is full-range (True) or TV-range (False).
@@ -379,6 +373,8 @@ and floating-point data.
 They can also be used for range conversions.
 Pixel values are not clipped during a conversion between two TV-range
 formats.</p>
+<p><span class="host">Avisynth+</span> Alpha planes are always processed
+as full-range.<p>
 
 <p class="var">dmode</p>
 <p>Dithering mode, when applicable.</p>
@@ -548,20 +544,38 @@ features.</p>
 
 <h3><a id="matrix"></a>matrix</h3>
 
-<pre class="proto">fmtc.matrix (
+<table class="n" width="100%">
+<tr>
+<td class="n"><pre class="proto">fmtc.matrix (
 	clip     : clip        ;
 	mat      : data   : opt;
 	mats     : data   : opt;
 	matd     : data   : opt;
-	fulls    : int    : opt; (depends on the colorspace)
-	fulld    : int    : opt; (fulls)
+	fulls    : int    : opt; (depends)
+	fulld    : int    : opt; (depends)
 	coef     : float[]: opt;
 	csp      : int    : opt;
 	col_fam  : int    : opt;
 	bits     : int    : opt;
 	singleout: int    : opt; (-1)
 	cpuopt   : int    : opt; (-1)
-)</pre>
+)</pre></td>
+<td class="n"><pre class="proto">fmtc_matrix (
+	clip   c,
+	string mat (undefined),
+	string mats (undefined),
+	string matd (undefined),
+	bool   fulls (depends),
+	bool   fulld (depends),
+	string coef (undefined),
+	string csp (undefined),
+	string col_fam (undefined),
+	int    bits (undefined),
+	int    singleout (-1),
+	int    cpuopt (-1)
+)</pre></td>
+</tr>
+</table>
 
 <p>Colorspace conversion or simple cross-plane matrix.</p>
 
@@ -585,16 +599,31 @@ make sense as these colorspaces are defined with different primaries.
 For meaningful results, convert to R’G’B’ then to linear RGB and use
 </code>primaries</code> to perform the intermediary conversion.</p>
 
+<p>The <code>_ColorRange</code> frame property is set if the <var>fulld</var>
+parameter has been explicitely defined.
+If the destination colorspace is a standardized one (as deduced from the
+specified matrix), the <code>_Matrix</code> and <code>_ColorSpace</code>
+properties are set, otherwise they are deleted from the frame.</p>
+
+<p><span class="host">Avisynth+</span>If an alpha channel is present in
+both the source and destination colorspaces, it is copied and its bitdepth is
+possibly adapted to the destination format.
+If there is no alpha channel in the source, full opacity is assumed.
+If there is no alpha channel in the destination, the plane is lost.<p>
+
 <h4>Parameters</h4>
 
 <p class="var">clip</p>
 <p>The input clip. Mandatory.
 Supported input formats:</p>
 <ul>
-<li>8-, 9-, 10-, 12- and 16-bit integer.</li>
+<li>8-, 10-, 12-, 14- and 16-bit integer.</li>
 <li>32-bit floating point.</li>
 <li>Any planar colorspace with 3 planes.</li>
 </ul>
+<p><span class="host">Vapoursynth</span> 9-bit integer data is supported too.<p>
+<p><span class="host">Avisynth+</span>  Colorspaces with an alpha channel are
+supported too.<p>
 
 <p class="var">mat</p>
 <p>Predefined matrix for conversions to and from R’G’B’.
@@ -730,11 +759,21 @@ For example, with an R’G’B’ input:</p>
 
 
 <p class="var">csp</p>
-<p>The destination format, as Vapoursynth constant.
+<p>The destination format.
 It cannot change the data type (integer or float) nor the chroma
 subsampling.
-If the colorspace family is set to GRAY, single-plane processing is enabled.
-The output plane is selected with <var>singleout</var> (0 if not specified).</p>
+If the colorspace family is set to GRAY (or Y), single-plane processing is
+enabled.
+The output plane is selected with <var>singleout</var> (0 if not
+specified).
+Only planar colorspaces are allowed.</p>
+<p><span class="host">Vapoursynth</span> The format is a Vapoursynth
+built-in constant.</p>
+<p><span class="host">Avisynth+</span> The format is a string with the
+same kind of content as the result from <code>BuildPixelType</code> or the
+<var>pixel_type</var> parameter from <code>BlankClip</code>.
+For example: <code>"RGBP48"</code>, <code>"YV12"</code>,
+<code>"YUV444PS"</code>…</p>
 
 <p class="var">col_fam</p>
 <p>Explicit specification of the destination color family, as Vapoursynth
@@ -745,9 +784,10 @@ input clip.</p>
 
 <p class="var">bits</p>
 <p>Explicit specification of the destination bitdepth.
-The only allowed values are 8, 9, 10, 12, 16 and 32.
-However you cannot reduce the bitdepth, only keep or increase it.
+The only allowed values are 8, 10, 12, 14, 16 and 32.
+However you cannot reduce the bitdepth, only keep it constant or increase it.
 Supersedes the bitdepth from <var>csp</var>.</p>
+<p><span class="host">Vapoursynth</span> 9 bits is allowed too.</p>
 
 <p class="var">singleout</p>
 <p>Enable single-plane processing.
@@ -804,13 +844,18 @@ The BT.2020 gamma curve is used in both directions.
 When operating on floating point data, the function uses the 12-bit variant
 of the scaling coefficients.</p>
 
+<p>The <code>_Matrix</code>, <code>_ColorSpace</code> and <code>_Transfer</code>
+frame properties are set according to the transformation.
+The <code>_ColorRange</code> property is set if the <var>full</var>
+parameter has been explicitely defined.</p>
+
 <h4>Parameters</h4>
 
 <p class="var">clip</p>
 <p>The input clip. Mandatory.
 Supported input formats:</p>
 <ul>
-<li>8-, 9-, 10-, 12- and 16-bit integer for Y’Cb’Cr’, 16-bit integer for RGB.</li>
+<li>8-, 9-, 10-, 12-, 14- and 16-bit integer for Y’Cb’Cr’, 16-bit integer for RGB.</li>
 <li>32-bit floating point.</li>
 <li>YUV and RGB colorspaces.</li>
 </ul>
@@ -882,6 +927,8 @@ whose specifications are given by the primaries.
 For more details, see Charles Poynton, <i>A Guided Tour of Color Space</i>,
 1997.</p>
 
+<p>The <code>_Primaries</code> frame property is set or deleted, depending
+on the target gamut.</p>
 
 <h4>Parameters</h4>
 
@@ -1047,13 +1094,22 @@ is not the sum of the impulse</li>
 between the sampling points.</li>
 </ul>
 
+<p>The function handles the following frame properties:</p>
+<table>
+<tr><th>Property</th><th>Read condition</th><th>Write condition</th></tr>
+<tr><td><b><code>_FieldBased</code></b></td><td>Automatic interlacing detection</td><td rowspan="2">Interlaced<br />content</td></tr>
+<tr><td><b><code>_Field</code></b></td><td>Interlaced content</td></tr>
+<tr><td><b><code>_ChromaLocation</code></b></td><td></td><td>Depends on <var>cplace</var> parameters</td></tr>
+<tr><td><b><code>_ColorRange</code></b></td><td></td><td><var>fulld</var> is explicitly set</td></tr>
+</table>
+
 <h4>Parameters</h4>
 
 <p class="var">clip</p>
 <p>Clip to be resized. Mandatory.
 Supported input formats:</p>
 <ul>
-<li>8-, 9-, 10-, 12- and 16-bit integer.</li>
+<li>8-, 9-, 10-, 12-, 16- and 16-bit integer.</li>
 <li>32-bit floating point.</li>
 <li>Any planar colorspace.</li>
 </ul>
@@ -1413,6 +1469,8 @@ Use <code>bitdepth</code> to properly convert the output to a lower
 bitdepth.</p>
 <p>The signal is clipped depending on the transfer specification or the domain
 requirement of the functions.</p>
+<p>The function sets the <code>_ColorRange</code> and <code>_Transfer</code>
+frame properties.</p>
 
 <h4>Parameters</h4>
 
@@ -1565,6 +1623,14 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <li><code>bitdepth</code>: added dithering <var>mode</var> 9: quasirandom sequences.</li>
 <li><code>bitdepth</code>: added a triangular probability distribution function (TPDF) for the dithering patterns and noises, along with the associated parameters <var>tpdfo</var> and <var>tpdfn</var>.</li>
 <li><code>bitdepth</code>: added <var>corplane</var> parameter to prevent colored noise in RGB processing.</li>
+<li><code>bitdepth</code>: fixed crash when trying to change the range (full or TV) without reducing the bitdepth.</li>
+<li><code>matrix</code>: deletes the <code>_Matrix</code> and <code>_ColorSpace</code> properties if a non-standard matrix is used.</li>
+<li><code>matrix2020cl</code>: sets the <code>_Matrix</code> and <code>_Transfer</code> frame properties.</li>
+<li><code>matrix2020cl</code>: fixed hideous colors with slightly out-of-colorspace values when converting from integer Y’Cb’Cr’ to integer linear RGB.</li>
+<li><code>transfer</code>: sYCC curve (similar to sRGB) now supports signed values.</li>
+<li>Added information on functions reading and writing frame properties.</li>
+<li>Added support for 14-bit data.</li>
+<li>Vapoursynth: still uses API v3.6 but can use Python constants from API v4.0.</li>
 </ul>
 
 <p><b>r23, 2021-07-14</b></p>

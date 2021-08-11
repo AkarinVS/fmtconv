@@ -29,9 +29,11 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 #include "fmtc/Convert.h"
+#include "fmtc/fnc.h"
 #include "fmtc/Matrix.h"
 #include "fmtc/Resample.h"
 #include "fmtc/version.h"
+#include "fmtcl/MatrixUtil.h"
 #include "fstb/def.h"
 #include "vsutl/fnc.h"
 
@@ -94,17 +96,19 @@ Convert::Convert (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCore
 
 	// Matrix presets
 	std::string    mat (get_arg_str (in, out, "mat", ""));
-	std::string    mats ((   fmt_src.colorFamily == ::cmYUV ) ? mat : "");
-	std::string    matd ((   fmt_dst.colorFamily == ::cmYUV
-	                      || fmt_dst.colorFamily == ::cmGray) ? mat : "");
+	std::string    mats ((   vsutl::is_vs_yuv ( fmt_src.colorFamily)) ? mat : "");
+	std::string    matd ((   vsutl::is_vs_yuv ( fmt_dst.colorFamily)
+	                      || vsutl::is_vs_gray (fmt_dst.colorFamily)) ? mat : "");
 	mats = get_arg_str (in, out, "mats", mats);
 	matd = get_arg_str (in, out, "matd", matd);
 	if (! mats.empty () || ! matd.empty ())
 	{
 		fstb::conv_to_lower_case (mats);
 		fstb::conv_to_lower_case (matd);
-		Matrix::select_def_mat (mats, fmt_src);
-		Matrix::select_def_mat (matd, fmt_dst);
+		const auto     col_fam_src = fmtc::conv_vsfmt_to_colfam (fmt_src);
+		const auto     col_fam_dst = fmtc::conv_vsfmt_to_colfam (fmt_dst);
+		fmtcl::MatrixUtil::select_def_mat (mats, col_fam_src);
+		fmtcl::MatrixUtil::select_def_mat (matd, col_fam_dst);
 		_mats = Matrix::find_cs_from_mat_str (*this, mats, true);
 		_matd = Matrix::find_cs_from_mat_str (*this, matd, true);
 	}
@@ -512,7 +516,7 @@ bool	Convert::fill_conv_step_with_curve (ConvStep &step, const ::VSFormat &fmt, 
 	{
 		if (mat == fmtcl::ColorSpaceH265_UNSPECIFIED)
 		{
-			if (fmt.colorFamily == ::cmRGB)
+			if (vsutl::is_vs_rgb (fmt.colorFamily))
 			{
 				step._tcurve = fmtcl::TransCurve_SRGB;
 			}
