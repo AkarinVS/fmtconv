@@ -31,7 +31,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtcl/Matrix2020CLProc.h"
 #include "vsutl/FilterBase.h"
 #include "vsutl/NodeRefSPtr.h"
-#include "VapourSynth.h"
+#include "vswrap.h"
 
 #include <memory>
 
@@ -74,17 +74,8 @@ protected:
 
 private:
 
-	enum Col
-	{
-		Col_R = 0,
-		Col_G = 1,
-		Col_B = 2
-	};
-
-	static const int  NBR_PLANES    = 3;
-	static const int  SHIFT_INT     = 12;  // Number of bits for the fractional part
-	static const int  VECT_LEN      = 16 / sizeof (int16_t);
-	static const int  RGB_INT_BITS  = 16;
+	static constexpr int _nbr_planes_proc = fmtcl::Matrix2020CLProc::_nbr_planes;
+	static constexpr int _rgb_int_bits    = fmtcl::Matrix2020CLProc::_rgb_int_bits;
 
 	const ::VSFormat &
 	               get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSFormat &fmt_src) const;

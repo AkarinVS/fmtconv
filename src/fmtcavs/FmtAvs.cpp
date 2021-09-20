@@ -24,6 +24,7 @@ http://www.wtfpl.net/ for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
+#include "avsutl/fnc.h"
 #include "fstb/fnc.h"
 #include "fmtcavs/FmtAvs.h"
 #include "avisynth.h"
@@ -41,6 +42,10 @@ namespace fmtcavs
 
 
 /*\\\ PUBLIC \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+constexpr int	FmtAvs::_max_css;
 
 
 
@@ -232,34 +237,33 @@ void	FmtAvs::conv_from_vi (const VideoInfo &vi)
 
 	_bitdepth    = vi.BitsPerComponent ();
 	_planar_flag = vi.IsPlanar ();
+	_alpha_flag  = avsutl::has_alpha (vi);
 
-	if (vi.IsRGB ())
+	if (avsutl::is_rgb (vi))
 	{
-		_col_fam    = fmtcl::ColorFamily_RGB;
-		_subspl_h   = 0; // Required for consistency
-		_subspl_v   = 0;
-		_alpha_flag = (vi.IsRGB32 () || vi.IsRGB64 ());
+		_col_fam  = fmtcl::ColorFamily_RGB;
+		_subspl_h = 0; // Required for consistency
+		_subspl_v = 0;
 	}
 	else if (vi.IsY ())
 	{
-		_col_fam    = fmtcl::ColorFamily_GRAY;
-		_subspl_h   = 0; // Required for consistency
-		_subspl_v   = 0;
+		_col_fam  = fmtcl::ColorFamily_GRAY;
+		_subspl_h = 0; // Required for consistency
+		_subspl_v = 0;
 	}
 	else
 	{
 		assert (vi.IsYUV () || vi.IsYUVA ());
-		_col_fam    = fmtcl::ColorFamily_YUV;
-		_alpha_flag = vi.IsYUVA ();
-		_subspl_h   = ((vi.pixel_type >> VideoInfo::CS_Shift_Sub_Width ) + 1) & 3;
-		_subspl_v   = ((vi.pixel_type >> VideoInfo::CS_Shift_Sub_Height) + 1) & 3;
+		_col_fam  = fmtcl::ColorFamily_YUV;
+		_subspl_h = ((vi.pixel_type >> VideoInfo::CS_Shift_Sub_Width ) + 1) & 3;
+		_subspl_v = ((vi.pixel_type >> VideoInfo::CS_Shift_Sub_Height) + 1) & 3;
 	}
 }
 
 
 
 // Returns 0 if conversion is OK.
-int	FmtAvs::conv_to_vi (VideoInfo &vi)
+int	FmtAvs::conv_to_vi (VideoInfo &vi) const
 {
 	assert (is_valid ());
 
@@ -312,7 +316,6 @@ int	FmtAvs::conv_to_vi (VideoInfo &vi)
 	{
 		if (_planar_flag)
 		{
-			pixel_type |= VideoInfo::CS_YUY2;
 			pixel_type |= VideoInfo::CS_PLANAR;
 			pixel_type |= VideoInfo::CS_VPlaneFirst;
 			pixel_type |= (_alpha_flag) ? VideoInfo::CS_YUVA : VideoInfo::CS_YUV;
@@ -366,6 +369,8 @@ int	FmtAvs::conv_to_vi (VideoInfo &vi)
 
 
 
+// Makes sure all the field are initialised, but doesn't guarantee
+// that it corresponds to a valid avisynth colorspace.
 bool	FmtAvs::is_valid () const noexcept
 {
 	return (
@@ -440,11 +445,31 @@ bool	FmtAvs::has_alpha () const noexcept
 
 
 
+void	FmtAvs::set_subspl_h (int ss) noexcept
+{
+	assert (ss >= 0);
+	assert (ss <= _max_css);
+
+	_subspl_h = ss;
+}
+
+
+
 int	FmtAvs::get_subspl_h () const noexcept
 {
 	assert (is_valid ());
 
 	return _subspl_h;
+}
+
+
+
+void	FmtAvs::set_subspl_v (int ss) noexcept
+{
+	assert (ss >= 0);
+	assert (ss <= _max_css);
+
+	_subspl_v = ss;
 }
 
 

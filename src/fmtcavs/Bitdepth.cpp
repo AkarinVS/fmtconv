@@ -25,6 +25,7 @@ http://www.wtfpl.net/ for more details.
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 #include "avsutl/fnc.h"
+#include "fmtcavs/FmtAvs.h"
 #include "fmtcavs/Bitdepth.h"
 #include "fmtcavs/CpuOpt.h"
 #include "fmtcavs/fnc.h"
@@ -58,6 +59,7 @@ Bitdepth::Bitdepth (::IScriptEnvironment &env, const ::AVSValue &args)
 	}
 
 	// Guess the output format if incomplete
+	const FmtAvs   fmt_src (_vi_src);
 	int            res      = args [Param_BITS].AsInt (-1);
 	const auto &   arg_flt  = args [Param_FLT];
 	bool           flt_flag = arg_flt.AsBool ();
@@ -90,16 +92,9 @@ Bitdepth::Bitdepth (::IScriptEnvironment &env, const ::AVSValue &args)
 	}
 
 	// Builds and validates the output format
-	vi.pixel_type &= ~::VideoInfo::CS_Sample_Bits_Mask;
-	switch (res)
-	{
-	case 8:  vi.pixel_type |= ::VideoInfo::CS_Sample_Bits_8;  break;
-	case 10: vi.pixel_type |= ::VideoInfo::CS_Sample_Bits_10; break;
-	case 12: vi.pixel_type |= ::VideoInfo::CS_Sample_Bits_12; break;
-	case 16: vi.pixel_type |= ::VideoInfo::CS_Sample_Bits_16; break;
-	case 32: vi.pixel_type |= ::VideoInfo::CS_Sample_Bits_32; break;
-	default: assert (false); break;
-	}
+	auto           fmt_dst = fmt_src;
+	fmt_dst.set_bitdepth (res);
+	fmt_dst.conv_to_vi (vi);
 
 	// Conversion-related things
 	_fulls_flag     =
@@ -109,12 +104,15 @@ Bitdepth::Bitdepth (::IScriptEnvironment &env, const ::AVSValue &args)
 		(args [Param_FULLS].Defined () || args [Param_FULLD].Defined ());
 
 	// Configures the plane processor
-	_plane_proc_uptr = std::make_unique <avsutl::PlaneProcessor> (
-		vi, _vi_src, *this
+	_plane_proc_uptr =
+		std::make_unique <avsutl::PlaneProcessor> (vi, *this, false);
+	_plane_proc_uptr->set_dst_clip_info (avsutl::PlaneProcessor::ClipType_NORMAL);
+	_plane_proc_uptr->set_clip_info (
+		avsutl::PlaneProcessor::ClipIdx_SRC1,
+		_clip_src_sptr,
+		avsutl::PlaneProcessor::ClipType_NORMAL
 	);
 	_plane_proc_uptr->set_proc_mode (args [Param_PLANES].AsString ("all"));
-	_plane_proc_uptr->set_clip_info (0, avsutl::PlaneProcessor::ClipType_NORMAL);
-	_plane_proc_uptr->set_clip_info (1, avsutl::PlaneProcessor::ClipType_NORMAL);
 
 	// Dithering parameters
 	auto           dmode = static_cast <fmtcl::Dither::DMode> (
@@ -181,11 +179,21 @@ Bitdepth::Bitdepth (::IScriptEnvironment &env, const ::AVSValue &args)
 	::PVideoFrame  src_sptr = _clip_src_sptr->GetFrame (n, env_ptr);
 	::PVideoFrame	dst_sptr = build_new_frame (*env_ptr, vi, &src_sptr);
 
-	_plane_proc_uptr->process_frame (
-		dst_sptr, n, *env_ptr,
-		&_clip_src_sptr, nullptr, nullptr,
-		nullptr
-	);
+	_plane_proc_uptr->process_frame (dst_sptr, n, *env_ptr, nullptr);
+
+	// Frame properties
+	if (supports_props ())
+	{
+		::AVSMap *     props_ptr = env_ptr->getFramePropsRW (dst_sptr);
+
+		if (_range_def_flag)
+		{
+			const int      cr_val = (_fulld_flag) ? 0 : 1;
+			env_ptr->propSetInt (
+				props_ptr, "_ColorRange", cr_val, ::PROPAPPENDMODE_REPLACE
+			);
+		}
+	}
 
 	return dst_sptr;
 }
@@ -206,7 +214,9 @@ void	Bitdepth::do_process_plane (::PVideoFrame &dst_sptr, int n, ::IScriptEnviro
 	const int      stride_dst   = dst_sptr->GetPitch (plane_id);
 	const uint8_t* data_src_ptr = src_sptr->GetReadPtr (plane_id);
 	const int      stride_src   = src_sptr->GetPitch (plane_id);
-	const int      w = _plane_proc_uptr->get_width (dst_sptr, plane_id);
+	const int      w = _plane_proc_uptr->get_width (
+		dst_sptr, plane_id, avsutl::PlaneProcessor::ClipIdx_DST
+	);
 	const int      h = _plane_proc_uptr->get_height (dst_sptr, plane_id);
 
 	try
@@ -220,18 +230,6 @@ void	Bitdepth::do_process_plane (::PVideoFrame &dst_sptr, int n, ::IScriptEnviro
 	catch (...)
 	{
 		assert (false);
-	}
-
-	// Frame properties
-	if (supports_props ())
-	{
-		::AVSMap *     props_ptr = env.getFramePropsRW (dst_sptr);
-
-		if (_range_def_flag)
-		{
-			const int      cr_val = (_fulld_flag) ? 0 : 1;
-			env.propSetInt (props_ptr, "_ColorRange", cr_val, ::PROPAPPENDMODE_REPLACE);
-		}
 	}
 }
 

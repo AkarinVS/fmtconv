@@ -51,6 +51,8 @@ AM_CXXFLAGS  = -std=$(CXXSTD) $(commoncflags) $(warnflagscpp) $(EXTRA_CXXFLAGS)
 AM_LDFLAGS   = $(PLUGINLDFLAGS)
 
 lib_LTLIBRARIES = libfmtconv.la
+check_PROGRAMS = fmtcltest
+fmtcltest_CXXFLAGS = $(AM_CXXFLAGS)
 
 commonsrc = \
         ../../src/conc/AioAdd.h \
@@ -138,6 +140,8 @@ commonsrc = \
         ../../src/fmtcl/ContFirSpline.h \
         ../../src/fmtcl/CpuOptBase.cpp \
         ../../src/fmtcl/CpuOptBase.h \
+        ../../src/fmtcl/Cst_fmtcl.cpp \
+        ../../src/fmtcl/Cst.h \
         ../../src/fmtcl/DiscreteFirCustom.cpp \
         ../../src/fmtcl/DiscreteFirCustom.h \
         ../../src/fmtcl/DiscreteFirInterface.cpp \
@@ -151,8 +155,14 @@ commonsrc = \
         ../../src/fmtcl/ErrDifBufFactory.h \
         ../../src/fmtcl/FilterResize.cpp \
         ../../src/fmtcl/FilterResize.h \
+        ../../src/fmtcl/Frame.h \
+        ../../src/fmtcl/Frame.hpp \
+        ../../src/fmtcl/FrameRO.h \
         ../../src/fmtcl/fnc_fmtcl.cpp \
         ../../src/fmtcl/fnc.h \
+        ../../src/fmtcl/fnc.hpp \
+        ../../src/fmtcl/GammaY.cpp \
+        ../../src/fmtcl/GammaY.h \
         ../../src/fmtcl/InterlacingType.h \
         ../../src/fmtcl/KernelData.cpp \
         ../../src/fmtcl/KernelData.h \
@@ -171,9 +181,14 @@ commonsrc = \
         ../../src/fmtcl/MatrixWrap.h \
         ../../src/fmtcl/MatrixWrap.hpp \
         ../../src/fmtcl/PicFmt.h \
+        ../../src/fmtcl/Plane.h \
+        ../../src/fmtcl/Plane.hpp \
+        ../../src/fmtcl/PlaneRO.h \
         ../../src/fmtcl/PrimariesPreset.h \
         ../../src/fmtcl/PrimUtil.cpp \
         ../../src/fmtcl/PrimUtil.h \
+        ../../src/fmtcl/ProcComp3Arg.cpp \
+        ../../src/fmtcl/ProcComp3Arg.h \
         ../../src/fmtcl/Proxy.h \
         ../../src/fmtcl/Proxy.hpp \
         ../../src/fmtcl/ProxyRwCpp.h \
@@ -204,6 +219,8 @@ commonsrc = \
         ../../src/fmtcl/TransCurve.h \
         ../../src/fmtcl/TransLut.cpp \
         ../../src/fmtcl/TransLut.h \
+        ../../src/fmtcl/TransModel.cpp \
+        ../../src/fmtcl/TransModel.h \
         ../../src/fmtcl/TransOp2084.cpp \
         ../../src/fmtcl/TransOp2084.h \
         ../../src/fmtcl/TransOpAcesCc.cpp \
@@ -262,6 +279,7 @@ libfmtconv_la_SOURCES = $(commonsrc) \
         ../../src/main-vs.cpp \
         ../../src/types.h \
         ../../src/VapourSynth.h \
+        ../../src/vswrap.h \
         ../../src/fmtc/Bitdepth.cpp \
         ../../src/fmtc/Bitdepth.h \
         ../../src/fmtc/Convert.cpp \
@@ -306,8 +324,13 @@ libfmtconv_la_SOURCES = $(commonsrc) \
 
 libfmtconv_la_LDFLAGS = -no-undefined -avoid-version $(PLUGINLDFLAGS)
 libfmtconv_la_LIBADD =
+fmtcltest_LDADD =
 noinst_LTLIBRARIES =
 
+fmtcltest_SOURCES =  $(commonsrc) \
+        ../../src/test/TestGammaY.cpp \
+        ../../src/test/TestGammaY.h \
+        ../../src/test/main.cpp
 
 
 if X86
@@ -319,6 +342,7 @@ libsse2_la_SOURCES = \
 
 libsse2_la_CXXFLAGS = $(AM_CXXFLAGS) -msse2
 libfmtconv_la_LIBADD += libsse2.la
+fmtcltest_LDADD += libsse2.la
 noinst_LTLIBRARIES += libsse2.la
 
 commonsrcavx = \
@@ -328,6 +352,7 @@ libavx_la_SOURCES = $(commonsrcavx)
 
 libavx_la_CXXFLAGS = $(AM_CXXFLAGS) -mavx
 libfmtconv_la_LIBADD += libavx.la
+fmtcltest_LDADD += libavx.la
 noinst_LTLIBRARIES += libavx.la
 
 commonsrcavx2 = \
@@ -345,6 +370,7 @@ libavx2_la_SOURCES = $(commonsrcavx2) \
 
 libavx2_la_CXXFLAGS = $(AM_CXXFLAGS) -mavx2
 libfmtconv_la_LIBADD += libavx2.la
+fmtcltest_LDADD += libavx2.la
 noinst_LTLIBRARIES += libavx2.la
 
 endif

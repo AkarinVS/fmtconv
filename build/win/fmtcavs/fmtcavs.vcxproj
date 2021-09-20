@@ -117,6 +117,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp14</LanguageStandard>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -151,7 +152,11 @@
     <ClInclude Include="..\..\..\src\fmtcavs\fnc.h" />
     <ClInclude Include="..\..\..\src\fmtcavs\function_names.h" />
     <ClInclude Include="..\..\..\src\fmtcavs\Matrix.h" />
+    <ClInclude Include="..\..\..\src\fmtcavs\Matrix2020CL.h" />
+    <ClInclude Include="..\..\..\src\fmtcavs\Primaries.h" />
     <ClInclude Include="..\..\..\src\fmtcavs\ProcAlpha.h" />
+    <ClInclude Include="..\..\..\src\fmtcavs\Resample.h" />
+    <ClInclude Include="..\..\..\src\fmtcavs\Transfer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\avsutl\CsPlane.cpp" />
@@ -164,7 +169,11 @@
     <ClCompile Include="..\..\..\src\fmtcavs\FmtAvs.cpp" />
     <ClCompile Include="..\..\..\src\fmtcavs\fnc_fmtcavs.cpp" />
     <ClCompile Include="..\..\..\src\fmtcavs\Matrix.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcavs\Matrix2020CL.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcavs\Primaries.cpp" />
     <ClCompile Include="..\..\..\src\fmtcavs\ProcAlpha.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcavs\Resample.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcavs\Transfer.cpp" />
     <ClCompile Include="..\..\..\src\main-avs.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

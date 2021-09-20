@@ -74,7 +74,7 @@ Matrix::Matrix (::IScriptEnvironment &env, const ::AVSValue &args)
 		env.ThrowError (fmtcavs_MATRIX ": input must be 4:4:4.");
 	}
 	const int      nbr_planes_src = _vi_src.NumComponents ();
-	if (nbr_planes_src < _nbr_planes_proc)
+	if (fmt_src.get_nbr_comp_non_alpha () != _nbr_planes_proc)
 	{
 		env.ThrowError (
 			fmtcavs_MATRIX ": greyscale format not supported as input."
@@ -105,16 +105,6 @@ Matrix::Matrix (::IScriptEnvironment &env, const ::AVSValue &args)
 		env, args, fmt_src, _plane_out, force_col_fam_flag
 	);
 
-	if (   fmt_dst.is_float ()     != fmt_src.is_float ()
-	    || fmt_dst.get_bitdepth () <  fmt_src.get_bitdepth ()
-	    || fmt_dst.get_subspl_h () != fmt_src.get_subspl_h ()
-	    || fmt_dst.get_subspl_v () != fmt_src.get_subspl_v ())
-	{
-		env.ThrowError (fmtcavs_MATRIX
-			": specified output colorspace is not compatible with the input."
-		);
-	}
-
 	// Preliminary matrix test: deduces the target color family if unspecified
 	if (   ! force_col_fam_flag
 	    && fmt_dst.get_col_fam () != fmtcl::ColorFamily_GRAY)
@@ -134,12 +124,6 @@ Matrix::Matrix (::IScriptEnvironment &env, const ::AVSValue &args)
 			const auto tmp_csp = find_cs_from_mat_str (env, tmp_mat, false);
 			fmt_dst = find_dst_col_fam (tmp_csp, fmt_dst, fmt_src);
 		}
-	}
-
-	// Output format is validated
-	if (fmt_dst.conv_to_vi (vi) != 0)
-	{
-		env.ThrowError (fmtcavs_MATRIX ": illegal output colorspace.");
 	}
 
 	const int      nbr_expected_coef = _nbr_planes_proc * (_nbr_planes_proc + 1);
@@ -197,12 +181,12 @@ Matrix::Matrix (::IScriptEnvironment &env, const ::AVSValue &args)
 
 	// Alpha plane processing, if any
 	_proc_alpha_uptr = std::make_unique <fmtcavs::ProcAlpha> (
-		fmt_dst, fmt_src, _fulld_flag, _fulls_flag, vi.width, vi.height, cpu_opt
+		fmt_dst, fmt_src, vi.width, vi.height, cpu_opt
 	);
 
 	// Custom coefficients
 	const auto     coef_list =
-		fmtcl::conv_str_to_float_arr (args [Param_COEF].AsString (""));
+		extract_array_f (env, args [Param_COEF], fmtcavs_MATRIX ", coef");
 	const int      nbr_coef        = int (coef_list.size ());
 	const bool     custom_mat_flag = (nbr_coef > 0);
 	const int      nbr_proc_planes_src = fmt_src.get_nbr_comp_non_alpha ();
@@ -256,6 +240,28 @@ Matrix::Matrix (::IScriptEnvironment &env, const ::AVSValue &args)
 		break;
 	}
 
+	// Sets the output colorspace accordingly
+	const auto     final_cf =
+		fmtcl::MatrixUtil::find_cf_from_cs (_csp_out, false);
+	fmt_dst.set_col_fam (final_cf);
+
+	// Checks the output colorspace
+	if (   fmt_dst.is_float ()     != fmt_src.is_float ()
+	    || fmt_dst.get_bitdepth () <  fmt_src.get_bitdepth ()
+	    || fmt_dst.get_subspl_h () != fmt_src.get_subspl_h ()
+	    || fmt_dst.get_subspl_v () != fmt_src.get_subspl_v ())
+	{
+		env.ThrowError (fmtcavs_MATRIX
+			": specified output colorspace is not compatible with the input."
+		);
+	}
+
+	// Output format is validated
+	if (fmt_dst.conv_to_vi (vi) != 0)
+	{
+		env.ThrowError (fmtcavs_MATRIX ": illegal output colorspace.");
+	}
+
 	prepare_matrix_coef (
 		env, *_proc_uptr, mat_main,
 		fmt_dst, _fulld_flag,
@@ -286,49 +292,10 @@ fmtcl::ColorSpaceH265	Matrix::find_cs_from_mat_str (::IScriptEnvironment &env, c
 	::PVideoFrame  src_sptr = _clip_src_sptr->GetFrame (n, env_ptr);
 	::PVideoFrame	dst_sptr = build_new_frame (*env_ptr, vi, &src_sptr);
 
-	const int      p0d = avsutl::CsPlane::get_plane_id (0, vi);
-	const int      p1d = avsutl::CsPlane::get_plane_id (1, vi);
-	const int      p2d = avsutl::CsPlane::get_plane_id (2, vi);
-
-	const int      p0s = avsutl::CsPlane::get_plane_id (0, _vi_src);
-	const int      p1s = avsutl::CsPlane::get_plane_id (1, _vi_src);
-	const int      p2s = avsutl::CsPlane::get_plane_id (2, _vi_src);
-
-	const int      w   = vi.width;
-	const int      h   = vi.height;
-
-	uint8_t * const   dst_ptr_arr [fmtcl::MatrixProc::_nbr_planes] =
-	{
-		                              dst_sptr->GetWritePtr (p0d),
-		(_plane_out >= 0) ? nullptr : dst_sptr->GetWritePtr (p1d),
-		(_plane_out >= 0) ? nullptr : dst_sptr->GetWritePtr (p2d)
-	};
-	const int         dst_str_arr [fmtcl::MatrixProc::_nbr_planes] =
-	{
-		                              dst_sptr->GetPitch (p0d),
-		(_plane_out >= 0) ? 0       : dst_sptr->GetPitch (p1d),
-		(_plane_out >= 0) ? 0       : dst_sptr->GetPitch (p2d)
-	};
-
-	const uint8_t * const
-	                  src_ptr_arr [fmtcl::MatrixProc::_nbr_planes] =
-	{
-		src_sptr->GetReadPtr (p0s),
-		src_sptr->GetReadPtr (p1s),
-		src_sptr->GetReadPtr (p2s)
-	};
-	const int         src_str_arr [fmtcl::MatrixProc::_nbr_planes] =
-	{
-		src_sptr->GetPitch (p0s),
-		src_sptr->GetPitch (p1s),
-		src_sptr->GetPitch (p2s)
-	};
-
-	_proc_uptr->process (
-		dst_ptr_arr, dst_str_arr,
-		src_ptr_arr, src_str_arr,
-		w, h
-	);
+	const auto     pa { build_mat_proc (
+		vi, dst_sptr, _vi_src, src_sptr, (_plane_out >= 0)
+	) };
+	_proc_uptr->process (pa);
 
 	// Alpha plane now
 	_proc_alpha_uptr->process_plane (dst_sptr, src_sptr);

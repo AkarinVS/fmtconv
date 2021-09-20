@@ -70,17 +70,17 @@ public:
 	static const int  LOGLUT_SIZE    = TransLut::LOGLUT_SIZE;
 
 	static inline void
-		            find_index (const TransLut::FloatIntMix val_arr [4], __m128i &index, __m128 &frac);
+		            find_index (const TransLut::FloatIntMix val_arr [4], __m128i &index, __m128 &frac) noexcept;
 };
 
 
 
 template <>
-void	TransLut_FindIndexSse2 <TransLut::MapperLin>::find_index (const TransLut::FloatIntMix val_arr [4], __m128i &index, __m128 &frac)
+void	TransLut_FindIndexSse2 <TransLut::MapperLin>::find_index (const TransLut::FloatIntMix val_arr [4], __m128i &index, __m128 &frac) noexcept
 {
-	assert (val_arr != 0);
+	assert (val_arr != nullptr);
 	
-	const int      offset    = -LINLUT_MIN_F * (1 << LINLUT_RES_L2);
+	constexpr int  offset    = -LINLUT_MIN_F * (1 << LINLUT_RES_L2);
 	const __m128   scale     = _mm_set1_ps (1 << LINLUT_RES_L2);
 	const __m128i  offset_ps = _mm_set1_epi32 (offset);
 	const __m128   val_min   = _mm_set1_ps (0                 - offset);
@@ -99,18 +99,18 @@ void	TransLut_FindIndexSse2 <TransLut::MapperLin>::find_index (const TransLut::F
 
 
 template <>
-void	TransLut_FindIndexSse2 <TransLut::MapperLog>::find_index (const TransLut::FloatIntMix val_arr [4], __m128i &index, __m128 &frac)
+void	TransLut_FindIndexSse2 <TransLut::MapperLog>::find_index (const TransLut::FloatIntMix val_arr [4], __m128i &index, __m128 &frac) noexcept
 {
-	assert (val_arr != 0);
+	assert (val_arr != nullptr);
 
 	// Constants
-	static const int      mant_size = 23;
-	static const int      exp_bias  = 127;
-	static const uint32_t base      = (exp_bias + LOGLUT_MIN_L2) << mant_size;
-	static const float    val_min   = 1.0f / (int64_t (1) << -LOGLUT_MIN_L2);
-//	static const float    val_max   = float (int64_t (1) << LOGLUT_MAX_L2);
-	static const int      frac_size = mant_size - LOGLUT_RES_L2;
-	static const uint32_t frac_mask = (1 << frac_size) - 1;
+	constexpr int        mant_size = 23;
+	constexpr int        exp_bias  = 127;
+	constexpr uint32_t   base      = (exp_bias + LOGLUT_MIN_L2) << mant_size;
+	constexpr float      val_min   = 1.0f / (int64_t (1) << -LOGLUT_MIN_L2);
+//	constexpr float      val_max   = float (int64_t (1) << LOGLUT_MAX_L2);
+	constexpr int        frac_size = mant_size - LOGLUT_RES_L2;
+	constexpr uint32_t   frac_mask = (1 << frac_size) - 1;
 
 	const __m128   zero_f     = _mm_setzero_ps ();
 	const __m128   one_f      = _mm_set1_ps (1);
@@ -177,7 +177,7 @@ void	TransLut_FindIndexSse2 <TransLut::MapperLog>::find_index (const TransLut::F
 
 
 template <class T>
-static fstb_FORCEINLINE void	TransLut_store_sse2 (T *dst_ptr, __m128 val)
+static fstb_FORCEINLINE void	TransLut_store_sse2 (T *dst_ptr, __m128 val) noexcept
 {
 	_mm_store_si128 (
 		reinterpret_cast <__m128i *> (dst_ptr),
@@ -185,7 +185,7 @@ static fstb_FORCEINLINE void	TransLut_store_sse2 (T *dst_ptr, __m128 val)
 	);
 }
 
-static fstb_FORCEINLINE void	TransLut_store_sse2 (float *dst_ptr, __m128 val)
+static fstb_FORCEINLINE void	TransLut_store_sse2 (float *dst_ptr, __m128 val) noexcept
 {
 	_mm_store_ps (dst_ptr, val);
 }
@@ -197,6 +197,18 @@ static fstb_FORCEINLINE void	TransLut_store_sse2 (float *dst_ptr, __m128 val)
 
 
 /*\\\ PUBLIC \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+constexpr int	TransLut::LINLUT_RES_L2;
+constexpr int	TransLut::LINLUT_MIN_F;
+constexpr int	TransLut::LINLUT_MAX_F;
+constexpr int	TransLut::LINLUT_SIZE_F;
+constexpr int	TransLut::LOGLUT_MIN_L2;
+constexpr int	TransLut::LOGLUT_MAX_L2;
+constexpr int	TransLut::LOGLUT_RES_L2;
+constexpr int	TransLut::LOGLUT_HSIZE;
+constexpr int	TransLut::LOGLUT_SIZE;
 
 
 
@@ -226,22 +238,20 @@ TransLut::TransLut (const TransOpInterface &curve, bool log_flag, SplFmt src_fmt
 
 
 
-void	TransLut::process_plane (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h)
+void	TransLut::process_plane (const Plane <> &dst, const PlaneRO <> &src, int w, int h) const noexcept
 {
-	assert (dst_ptr != 0);
-	assert (src_ptr != 0);
-	assert (stride_dst != 0 || h == 1);
-	assert (stride_src != 0 || h == 1);
+	assert (dst.is_valid (h));
+	assert (src.is_valid (h));
 	assert (w > 0);
 	assert (h > 0);
 
-	assert (_process_plane_ptr != 0);
-	(this->*_process_plane_ptr) (dst_ptr, src_ptr, stride_dst, stride_src, w, h);
+	assert (_process_plane_ptr != nullptr);
+	(this->*_process_plane_ptr) (dst, src, w, h);
 }
 
 
 
-TransLut::MapperLin::MapperLin (int lut_size, double range_beg, double range_lst)
+TransLut::MapperLin::MapperLin (int lut_size, double range_beg, double range_lst) noexcept
 :	_lut_size (lut_size)
 ,	_range_beg (range_beg)
 ,	_step ((range_lst - range_beg) / (lut_size - 1))
@@ -252,36 +262,36 @@ TransLut::MapperLin::MapperLin (int lut_size, double range_beg, double range_lst
 
 
 
-void	TransLut::MapperLin::find_index (const FloatIntMix &val, int &index, float &frac)
+void	TransLut::MapperLin::find_index (const FloatIntMix &val, int &index, float &frac) noexcept
 {
 	const float    val_scl   = val._f * (1 << LINLUT_RES_L2);
 	const int      index_raw = fstb::floor_int (val_scl);
-	const int      offset    = -LINLUT_MIN_F * (1 << LINLUT_RES_L2);
+	constexpr int  offset    = -LINLUT_MIN_F * (1 << LINLUT_RES_L2);
 	index = fstb::limit (index_raw + offset, 0, LINLUT_SIZE_F - 2);
 	frac  = val_scl - float (index_raw);
 }
 
 
 
-double	TransLut::MapperLin::find_val (int index) const
+double	TransLut::MapperLin::find_val (int index) const noexcept
 {
-	return (_range_beg + index * _step);
+	return _range_beg + index * _step;
 }
 
 
 
-void	TransLut::MapperLog::find_index (const FloatIntMix &val, int &index, float &frac)
+void	TransLut::MapperLog::find_index (const FloatIntMix &val, int &index, float &frac) noexcept
 {
 	static_assert (LOGLUT_MIN_L2 <= 0, "LOGLUT_MIN_L2 must be negative");
 	static_assert (LOGLUT_MAX_L2 >= 0, "LOGLUT_MAX_L2 must be positive");
 
-	static const int      mant_size = 23;
-	static const int      exp_bias  = 127;
-	static const uint32_t base      = (exp_bias + LOGLUT_MIN_L2) << mant_size;
-	static const float    val_min   = 1.0f / (int64_t (1) << -LOGLUT_MIN_L2);
-	static const float    val_max   = float (int64_t (1) << LOGLUT_MAX_L2);
-	static const int      frac_size = mant_size - LOGLUT_RES_L2;
-	static const uint32_t frac_mask = (1 << frac_size) - 1;
+	constexpr int        mant_size = 23;
+	constexpr int        exp_bias  = 127;
+	constexpr uint32_t   base      = (exp_bias + LOGLUT_MIN_L2) << mant_size;
+	constexpr float      val_min   = 1.0f / (int64_t (1) << -LOGLUT_MIN_L2);
+	constexpr float      val_max   = float (int64_t (1) << LOGLUT_MAX_L2);
+	constexpr int        frac_size = mant_size - LOGLUT_RES_L2;
+	constexpr uint32_t   frac_mask = (1 << frac_size) - 1;
 
 	const uint32_t val_u = val._i & 0x7FFFFFFF;
 	const float    val_a = fabsf (val._f);
@@ -323,7 +333,7 @@ void	TransLut::MapperLog::find_index (const FloatIntMix &val, int &index, float 
 
 
 
-double	TransLut::MapperLog::find_val (int index) const
+double	TransLut::MapperLog::find_val (int index) const noexcept
 {
 	assert (index >= 0);
 	assert (index < LOGLUT_SIZE);
@@ -348,7 +358,7 @@ double	TransLut::MapperLog::find_val (int index) const
 		}
 	}
 
-	return (val);
+	return val;
 }
 
 
@@ -387,15 +397,15 @@ void	TransLut::generate_lut (const TransOpInterface &curve)
 
 	else
 	{
+		assert (! _loglut_flag);
+
 		int            range = 1 << _src_bits;
-		if (_src_bits <= 8)
+		if (_src_fmt == SplFmt_INT8)
 		{
-			_lut.set_type <uint8_t> ();
 			_lut.resize (1 << 8);
 		}
 		else
 		{
-			_lut.set_type <uint16_t> ();
 			_lut.resize (1 << 16);
 		}
 		const int      sb16  = (_src_full_flag) ? 0      :  16 << 8;
@@ -407,6 +417,7 @@ void	TransLut::generate_lut (const TransOpInterface &curve)
 		const double   r_lst = double (range - 1 - sbn) / sdif;
 		if (_dst_fmt == SplFmt_FLOAT)
 		{
+			_lut.set_type <float> ();
 			MapperLin      mapper (range, r_beg, r_lst);
 			generate_lut_flt <float> (curve, mapper);
 		}
@@ -420,12 +431,14 @@ void	TransLut::generate_lut (const TransOpInterface &curve)
 			const double   add  = dbn;
 			if (_dst_bits > 8)
 			{
+				_lut.set_type <uint16_t> ();
 				generate_lut_int <uint16_t> (
 					curve, range, r_beg, r_lst, mul, add
 				);
 			}
 			else
 			{
+				_lut.set_type <uint8_t> ();
 				generate_lut_int <uint8_t> (
 					curve, range, r_beg, r_lst, mul, add
 				);
@@ -473,6 +486,8 @@ void	TransLut::generate_lut_flt (const TransOpInterface &curve, const M &mapper)
 
 void	TransLut::init_proc_fnc ()
 {
+	assert (! _loglut_flag || _src_fmt == SplFmt_FLOAT);
+
 	const int      s =
 		  (_loglut_flag            ) ? 0
 		: (_src_fmt == SplFmt_FLOAT) ? 1
@@ -539,64 +554,58 @@ void	TransLut::init_proc_fnc_sse2 (int selector)
 
 
 template <class TS, class TD>
-void	TransLut::process_plane_int_any_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h)
+void	TransLut::process_plane_int_any_cpp (Plane <> dst, PlaneRO <> src, int w, int h) const noexcept
 {
-	assert (dst_ptr != 0);
-	assert (src_ptr != 0);
-	assert (stride_dst != 0 || h == 1);
-	assert (stride_src != 0 || h == 1);
+	assert (dst.is_valid (h));
+	assert (src.is_valid (h));
 	assert (w > 0);
 	assert (h > 0);
 
 	for (int y = 0; y < h; ++y)
 	{
-		const TS *     s_ptr = reinterpret_cast <const TS *> (src_ptr);
-		TD *           d_ptr = reinterpret_cast <      TD *> (dst_ptr);
+		const PlaneRO <TS>   s { src };
+		const Plane <TD>     d { dst };
 
 		for (int x = 0; x < w; ++x)
 		{
-			const int          index = s_ptr [x];
-			d_ptr [x] = _lut.use <TD> (index);
+			const int          index = s._ptr [x];
+			d._ptr [x] = _lut.use <TD> (index);
 		}
 
-		src_ptr += stride_src;
-		dst_ptr += stride_dst;
+		src.step_line ();
+		dst.step_line ();
 	}
 }
 
 
 
 template <class TD, class M>
-void	TransLut::process_plane_flt_any_cpp (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h)
+void	TransLut::process_plane_flt_any_cpp (Plane <> dst, PlaneRO <> src, int w, int h) const noexcept
 {
-	assert (dst_ptr != 0);
-	assert (src_ptr != 0);
-	assert (stride_dst != 0 || h == 1);
-	assert (stride_src != 0 || h == 1);
+	assert (dst.is_valid (h));
+	assert (src.is_valid (h));
 	assert (w > 0);
 	assert (h > 0);
 
 	for (int y = 0; y < h; ++y)
 	{
-		const FloatIntMix *  s_ptr =
-			reinterpret_cast <const FloatIntMix *> (src_ptr);
-		TD *                 d_ptr =
-			reinterpret_cast <               TD *> (dst_ptr);
+		const PlaneRO <FloatIntMix>   s { src };
+		const Plane <TD>              d { dst };
 
 		for (int x = 0; x < w; ++x)
 		{
 			int                index;
 			float              lerp;
-			M::find_index (s_ptr [x], index, lerp);
+			M::find_index (s._ptr [x], index, lerp);
 			const float        p_0  = _lut.use <float> (index    );
 			const float        p_1  = _lut.use <float> (index + 1);
 			const float        dif  = p_1 - p_0;
 			const float        val  = p_0 + lerp * dif;
-			d_ptr [x] = Convert <TD>::cast (val);
+			d._ptr [x] = Convert <TD>::cast (val);
 		}
 
-		src_ptr += stride_src;
-		dst_ptr += stride_dst;
+		src.step_line ();
+		dst.step_line ();
 	}
 }
 
@@ -607,21 +616,17 @@ void	TransLut::process_plane_flt_any_cpp (uint8_t *dst_ptr, const uint8_t *src_p
 
 
 template <class TD, class M>
-void	TransLut::process_plane_flt_any_sse2 (uint8_t *dst_ptr, const uint8_t *src_ptr, int stride_dst, int stride_src, int w, int h)
+void	TransLut::process_plane_flt_any_sse2 (Plane <> dst, PlaneRO <> src, int w, int h) const noexcept
 {
-	assert (dst_ptr != 0);
-	assert (src_ptr != 0);
-	assert (stride_dst != 0 || h == 1);
-	assert (stride_src != 0 || h == 1);
+	assert (dst.is_valid (h));
+	assert (src.is_valid (h));
 	assert (w > 0);
 	assert (h > 0);
 
 	for (int y = 0; y < h; ++y)
 	{
-		const FloatIntMix *  s_ptr =
-			reinterpret_cast <const FloatIntMix *> (src_ptr);
-		TD *                 d_ptr =
-			reinterpret_cast <               TD *> (dst_ptr);
+		const PlaneRO <FloatIntMix>   s { src };
+		const Plane <TD>              d { dst };
 
 		for (int x = 0; x < w; x += 4)
 		{
@@ -631,7 +636,7 @@ void	TransLut::process_plane_flt_any_sse2 (uint8_t *dst_ptr, const uint8_t *src_
 				uint32_t           _scal [4];
 			}                  index;
 			__m128             lerp;
-			TransLut_FindIndexSse2 <M>::find_index (s_ptr + x, index._vect, lerp);
+			TransLut_FindIndexSse2 <M>::find_index (s._ptr + x, index._vect, lerp);
 			__m128             val = _mm_set_ps (
 				_lut.use <float> (index._scal [3]    ),
 				_lut.use <float> (index._scal [2]    ),
@@ -646,11 +651,11 @@ void	TransLut::process_plane_flt_any_sse2 (uint8_t *dst_ptr, const uint8_t *src_
 			);
 			const __m128       dif = _mm_sub_ps (va2, val);
 			val = _mm_add_ps (val, _mm_mul_ps (dif, lerp));
-			TransLut_store_sse2 (&d_ptr [x], val);
+			TransLut_store_sse2 (&d._ptr [x], val);
 		}
 
-		src_ptr += stride_src;
-		dst_ptr += stride_dst;
+		src.step_line ();
+		dst.step_line ();
 	}
 }
 
@@ -661,15 +666,15 @@ void	TransLut::process_plane_flt_any_sse2 (uint8_t *dst_ptr, const uint8_t *src_
 
 
 template <class T>
-T	TransLut::Convert <T>::cast (float val)
+T	TransLut::Convert <T>::cast (float val) noexcept
 {
-	return (T (fstb::conv_int_fast (val)));
+	return T (fstb::conv_int_fast (val));
 }
 
 template <>
-float	TransLut::Convert <float>::cast (float val)
+float	TransLut::Convert <float>::cast (float val) noexcept
 {
-	return (val);
+	return val;
 }
 
 

@@ -29,6 +29,8 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include "fstb/def.h"
 
+#include "fmtcl/Frame.h"
+#include "fmtcl/FrameRO.h"
 #include "fmtcl/SplFmt.h"
 #if (fstb_ARCHI == fstb_ARCHI_X86)
 	#include "fmtcl/TransLut.h"
@@ -49,6 +51,8 @@ namespace fmtcl
 
 
 
+class ProcComp3Arg;
+
 class Matrix2020CLProc
 {
 
@@ -64,7 +68,8 @@ public:
 		Err_INVALID_FORMAT_COMBINATION = -1000
 	};
 
-	static const int   NBR_PLANES = 3;
+	static constexpr int _nbr_planes   =  3;
+	static constexpr int _rgb_int_bits = 16;
 
 	explicit        Matrix2020CLProc (bool sse2_flag, bool avx2_flag);
 	virtual        ~Matrix2020CLProc () {}
@@ -74,7 +79,7 @@ public:
 	// All stride values are in bytes
 	// h must be the frame height too, not only the processed stripe height
 	// (required for Stack16 formats to compute the lsb offset)
-	void           process (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const;
+	void           process (const ProcComp3Arg &arg) const;
 
 
 
@@ -95,27 +100,26 @@ private:
 		Col_B = 2
 	};
 
-	static const int  SHIFT_INT     =   12;   // Number of bits for the fractional part
-	static const int  RGB_INT_BITS  =   16;
-	static const int  BUF_LEN       = 2048;
+	static constexpr int _shift_int    =   12;   // Number of bits for the fractional part
+	static constexpr int _buf_len      = 2048;
 
-	typedef float FltBuf [BUF_LEN];
+	typedef std::array <float, _buf_len> FltBuf;
 	typedef fstb::ArrayAlign <FltBuf, 3, 32> BufAlign;
 
 	Err            setup_rgb_2_ycbcr ();
 	Err            setup_ycbcr_2_rgb ();
 
 	template <typename DST, int DB, class SRC, int SB>
-	void           conv_rgb_2_ycbcr_cpp_int (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const;
-	void           conv_rgb_2_ycbcr_cpp_flt (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const;
+	void           conv_rgb_2_ycbcr_cpp_int (Frame <> dst, FrameRO <> src, int w, int h) const noexcept;
+	void           conv_rgb_2_ycbcr_cpp_flt (Frame <> dst, FrameRO <> src, int w, int h) const noexcept;
 
 	template <typename DST, int DB, class SRC, int SB>
-	void           conv_ycbcr_2_rgb_cpp_int (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const;
-	void           conv_ycbcr_2_rgb_cpp_flt (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const;
+	void           conv_ycbcr_2_rgb_cpp_int (Frame <> dst, FrameRO <> src, int w, int h) const noexcept;
+	void           conv_ycbcr_2_rgb_cpp_flt (Frame <> dst, FrameRO <> src, int w, int h) const noexcept;
 
 #if (fstb_ARCHI == fstb_ARCHI_X86)
-	void           conv_rgb_2_ycbcr_sse2_flt (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const;
-	void           conv_ycbcr_2_rgb_sse2_flt (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const;
+	void           conv_rgb_2_ycbcr_sse2_flt (Frame <> dst, FrameRO <> src, int w, int h) const noexcept;
+	void           conv_ycbcr_2_rgb_sse2_flt (Frame <> dst, FrameRO <> src, int w, int h) const noexcept;
 #endif   // fstb_ARCHI_X86
 
 	template <typename T>
@@ -125,30 +129,30 @@ private:
 	static fstb_FORCEINLINE T
 	               map_gam_to_lin (T v_gam, bool b12_flag);
 
-	SplFmt         _src_fmt;
-	int            _src_bits;
-	SplFmt         _dst_fmt;
-	int            _dst_bits;
+	SplFmt         _src_fmt     = SplFmt_ILLEGAL;
+	int            _src_bits    = 0;
+	SplFmt         _dst_fmt     = SplFmt_ILLEGAL;
+	int            _dst_bits    = 0;
 
-	bool           _sse2_flag;
-	bool           _avx2_flag;
+	bool           _sse2_flag   = false;
+	bool           _avx2_flag   = false;
 
-	bool           _to_yuv_flag;
-	bool           _b12_flag;
-	bool           _flt_flag;
-	bool           _full_range_flag;
+	bool           _to_yuv_flag = false;
+	bool           _b12_flag    = false;
+	bool           _flt_flag    = false;
+	bool           _full_range_flag = true;
 
-	std::array <int16_t, NBR_PLANES>
+	std::array <int16_t, _nbr_planes>
 	               _coef_rgby_int;
-	std::array <uint16_t, 1 << RGB_INT_BITS>
+	std::array <uint16_t, 1 << _rgb_int_bits>
 	               _map_gamma_int;
-	uint16_t       _coef_yg_a_int;
-	int32_t        _coef_yg_b_int;
+	uint16_t       _coef_yg_a_int = 0;
+	int32_t        _coef_yg_b_int = 0;
 	std::array <uint16_t, 2>
-	               _coef_cb_a_int;  // 0: cb >= 0, 1: cb < 0
+	               _coef_cb_a_int {};  // 0: cb >= 0, 1: cb < 0
 	std::array <uint16_t, 2>
-	               _coef_cr_a_int;
-	int32_t        _coef_cbcr_b_int;
+	               _coef_cr_a_int {};
+	int32_t        _coef_cbcr_b_int = 0;
 
 #if (fstb_ARCHI == fstb_ARCHI_X86)
 	std::unique_ptr <TransLut>
@@ -156,33 +160,31 @@ private:
 #endif   // fstb_ARCHI_X86
 
 	void (ThisType::*             // 0 = not set
-	               _proc_ptr) (uint8_t * const dst_ptr_arr [NBR_PLANES], const int dst_str_arr [NBR_PLANES], const uint8_t * const src_ptr_arr [NBR_PLANES], const int src_str_arr [NBR_PLANES], int w, int h) const;
+	               _proc_ptr) (Frame <> dst, FrameRO <> src, int w, int h) const noexcept = nullptr;
 
-	static const double
-	               _coef_rgb_to_y_dbl [NBR_PLANES];
-	static const double
-	               _coef_ryb_to_g_dbl [NBR_PLANES];
-	static const double
-	               _coef_cb_neg;
-	static const double
-	               _coef_cb_pos;
-	static const double
-	               _coef_cr_neg;
-	static const double
-	               _coef_cr_pos;
+	static constexpr std::array <double, _nbr_planes>
+	               _coef_rgb_to_y_dbl { 0.2627, 0.6780, 0.0593 };
 
-	static const double
-	               _alpha_b12;
-	static const double
-	               _alpha_low;
-	static const double
-	               _beta_b12;
-	static const double
-	               _beta_low;
-	static const double
-	               _slope_lin;
-	static const double
-	               _gam_pow;
+	static constexpr std::array <double, _nbr_planes>
+	               _coef_ryb_to_g_dbl
+	{
+		-_coef_rgb_to_y_dbl [Col_R] / _coef_rgb_to_y_dbl [Col_G],
+		+1                          / _coef_rgb_to_y_dbl [Col_G],
+		-_coef_rgb_to_y_dbl [Col_B] / _coef_rgb_to_y_dbl [Col_G]
+	};
+
+	static constexpr double _coef_cb_neg = 1.9404;
+	static constexpr double _coef_cb_pos = 1.5816;
+	static constexpr double _coef_cr_neg = 1.7184;
+	static constexpr double _coef_cr_pos = 0.9936;
+
+	static constexpr double _alpha_b12   = 1.0993;
+	static constexpr double _alpha_low   = 1.099 ;
+	static constexpr double _beta_b12    = 0.0181;
+	static constexpr double _beta_low    = 0.018 ;
+
+	static constexpr double _slope_lin   = 4.5;
+	static constexpr double _gam_pow     = 0.45;
 
 
 

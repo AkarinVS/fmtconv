@@ -43,6 +43,8 @@ class FmtAvs
 
 public:
 
+	static constexpr int _max_css = 3;
+
 	explicit       FmtAvs (std::string fmt_str);
 	explicit       FmtAvs (const VideoInfo &vi) noexcept;
 	               FmtAvs ()                        = default;
@@ -55,7 +57,7 @@ public:
 	void           invalidate () noexcept;
 	int            conv_from_str (std::string fmt_str);
 	void           conv_from_vi (const VideoInfo &vi);
-	int            conv_to_vi (VideoInfo &vi);
+	int            conv_to_vi (VideoInfo &vi) const;
 
 	bool           is_valid () const noexcept;
 
@@ -67,7 +69,9 @@ public:
 	               get_col_fam () const noexcept;
 	bool           is_planar () const noexcept;
 	bool           has_alpha () const noexcept;
+	void           set_subspl_h (int ss) noexcept;
 	int            get_subspl_h () const noexcept;
+	void           set_subspl_v (int ss) noexcept;
 	int            get_subspl_v () const noexcept;
 
 	int            get_nbr_comp_non_alpha () const noexcept;

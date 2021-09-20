@@ -29,7 +29,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtc/version.h"
 #include "fstb/def.h"
 #include "vsutl/Redirect.h"
-#include "VapourSynth.h"
+#include "vswrap.h"
 
 #include <algorithm>
 
@@ -485,10 +485,17 @@ VS_EXTERNAL_API (void) VapourSynthPluginInit (::VSConfigPlugin config_fnc, ::VSR
 		"a1:float[]:opt;"
 		"a2:float[]:opt;"
 		"a3:float[]:opt;"
+		"a1h:float[]:opt;"
+		"a2h:float[]:opt;"
+		"a3h:float[]:opt;"
+		"a1v:float[]:opt;"
+		"a2v:float[]:opt;"
+		"a3v:float[]:opt;"
 		"kovrspl:int[]:opt;"
 		"fh:float[]:opt;"
 		"fv:float[]:opt;"
 		"cnorm:int[]:opt;"
+		"total:float[]:opt;"
 		"totalh:float[]:opt;"
 		"totalv:float[]:opt;"
 		"invks:int[]:opt;"
@@ -528,6 +535,7 @@ VS_EXTERNAL_API (void) VapourSynthPluginInit (::VSConfigPlugin config_fnc, ::VSR
 		"bits:int:opt;"
 		"singleout:int:opt;"
 		"cpuopt:int:opt;"
+		"planes:float[]:opt;" // Masktools style
 		, &vsutl::Redirect <fmtc::Matrix>::create, 0, plugin_ptr
 	);
 
@@ -573,6 +581,7 @@ VS_EXTERNAL_API (void) VapourSynthPluginInit (::VSConfigPlugin config_fnc, ::VSR
 		"fulld:int:opt;"
 		"cpuopt:int:opt;"
 		"blacklvl:float:opt;"
+		"planes:float[]:opt;" // Masktools style
 		, &vsutl::Redirect <fmtc::Transfer>::create, 0, plugin_ptr
 	);
 

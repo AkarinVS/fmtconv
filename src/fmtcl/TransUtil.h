@@ -23,9 +23,7 @@ http://www.wtfpl.net/ for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "fmtcl/PicFmt.h"
 #include "fmtcl/TransCurve.h"
-#include "fmtcl/TransLut.h"
 #include "fmtcl/TransOpInterface.h"
 #include "fmtcl/TransOpLogC.h"
 
@@ -47,9 +45,6 @@ class TransUtil
 public:
 
 	typedef  std::shared_ptr <TransOpInterface> OpSPtr;
-
-	static std::unique_ptr <TransLut>
-	               build_lut (PicFmt dst_fmt, TransCurve curve_d, TransOpLogC::ExpIdx logc_ei_d, PicFmt src_fmt, TransCurve curve_s, TransOpLogC::ExpIdx logc_ei_s, double contrast, double gcor, double lvl_black, bool sse2_flag, bool avx2_flag);
 
 	static TransCurve
 	               conv_string_to_curve (const std::string &str);

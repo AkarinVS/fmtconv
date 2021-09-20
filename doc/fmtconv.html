@@ -3,22 +3,22 @@
 
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>fmtconv&nbsp;&mdash;&nbsp;format conversion tools for Vapoursynth</title>
+<title>fmtconv&nbsp;&mdash;&nbsp;format conversion tools for Vapoursynth and Avisynth+</title>
 <link rel="stylesheet" type="text/css" href="vapourdoc.css" />
 </head>
 
 <body><div class="global">
 
-<h1>fmtconv&nbsp;&mdash;&nbsp;format conversion tools for Vapoursynth</h1>
+<h1>fmtconv&nbsp;&mdash;&nbsp;format conversion tools for Vapoursynth and Avisynth+</h1>
 
 <h2>Abstract</h2>
 
 <table class="n">
 <tr><td class="n"><b>Authors:     </b></td><td class="n">&nbsp;</td><td class="n">Firesledge (aka Cretindesalpes)</td></tr>
-<tr><td class="n"><b>Version:     </b></td><td class="n">&nbsp;</td><td class="n">r23</td></tr>
+<tr><td class="n"><b>Version:     </b></td><td class="n">&nbsp;</td><td class="n">r25</td></tr>
 <tr><td class="n"><b>Download:    </b></td><td class="n">&nbsp;</td><td class="n"><a href="http://ldesoras.free.fr/prod.html#src_fmtconv">http://ldesoras.free.fr/prod.html</a></td></tr>
 <tr><td class="n"><b>Category:    </b></td><td class="n">&nbsp;</td><td class="n">Format tools</td></tr>
-<tr><td class="n"><b>Requirements:</b></td><td class="n">&nbsp;</td><td class="n"><a href="http://www.vapoursynth.com/">Vapoursynth</a></td></tr>
+<tr><td class="n"><b>Requirements:</b></td><td class="n">&nbsp;</td><td class="n"><a href="http://www.vapoursynth.com/">Vapoursynth</a> or <a href="https://avs-plus.net/">Avisynth+ 3.7.0</a></td></tr>
 <tr><td class="n"><b>License:     </b></td><td class="n">&nbsp;</td><td class="n"><a href="http://www.wtfpl.net/">WTFPL</a></td></tr>
 </table>
 
@@ -31,7 +31,8 @@
 <li class="tcont"><a href="#usage">Usage</a>
 	<ol style="list-style-type:armenian; margin-top:0.5em;">
 	<li><a href="#loading">Loading</a></li>
-	<li><a href="#examples">Examples</a></li>
+	<li><a href="#examples">Examples for Vapoursynth</a></li>
+	<li><a href="#examples">Examples for Avisynth+</a></li>
 	<li><a href="#compiling">Compiling from the source code</a></li>
 	</ol>
 </li>
@@ -55,7 +56,8 @@
 
 <h2><a id="intro"></a>I) Introduction</h2>
 
-<p>Fmtconv is a format-conversion plug-in for the Vapoursynth video processing engine.
+<p>Fmtconv is a format-conversion plug-in for the Vapoursynth and Avisynth+
+video processing engines.
 It does:</p>
 <ul>
 <li>Resizing.</li>
@@ -74,11 +76,13 @@ It does:</p>
 This does not mean it is slow or unoptimized, but fmtconv is clearly not on par with the fastest equivalent 8-bit filters.</p>
 
 
+
 <h2><a id="usage"></a>II) Usage</h2>
 
 <h3><a id="loading"></a>Loading fmtconv</h3>
 
-<p>Using the Python 3.4 interface:</p>
+<p>Using the Python 3.8 interface (or a higher version, it depends on your
+Vapoursynth version):</p>
 
 <pre class="src">import vapoursynth as vs
 core = vs.get_core ()
@@ -88,7 +92,8 @@ core.std.LoadPlugin (path=r'C:\path\fmtconv.dll')</pre>
 plug-in file to the autoloading directory.
 Check the Vapoursynth manual for more information.</p>
 
-<h3><a id="examples"></a>Examples</h3>
+
+<h3><a id="examples-vs"></a>Examples for Vapoursynth</h3>
 
 <h4>A basic example</h4>
 
@@ -201,6 +206,12 @@ c = core.fmtc.primaries (clip=c, prims="2100", primd="srgb")
 c = core.fmtc.transfer (clip=c, transs="linear", transd="srgb")
 c = core.fmtc.bitdepth (clip=c, bits=8)</pre>
 
+
+<h3><a id="examples-avs"></a>Examples for Avisynth+</h3>
+
+<p><em>Soon…</em></p>
+
+
 <h3><a id="compiling"></a>Compiling from the source code</h3>
 
 <h4>Visual C++</h4>
@@ -234,6 +245,8 @@ make install</pre>
 <li><code>--enable-debug</code> to activate debugging code</li>
 <li><code>--enable-clang</code> to use Clang instead of the default compiler which is usually GCC</li>
 </ul>
+<p>Only the Vapoursynth plug-in can be built in the GNU-based environment.</p>
+
 
 <h2><a id="description"></a>III) Filters description</h2>
 
@@ -539,7 +552,7 @@ features.</p>
 
 <p>Multi-purpose conversion function.</p>
 
-<p><i>Not available yet.</i></p>
+<p><em>Not available yet.</em></p>
 
 
 <h3><a id="matrix"></a>matrix</h3>
@@ -567,7 +580,7 @@ features.</p>
 	string matd (undefined),
 	bool   fulls (depends),
 	bool   fulld (depends),
-	string coef (undefined),
+	arrayf coef (undefined),
 	string csp (undefined),
 	string col_fam (undefined),
 	int    bits (undefined),
@@ -757,6 +770,10 @@ For example, with an R’G’B’ input:</p>
 </tr>
 </table></center>
 
+<p><span class="host">Vapoursynth</span> List is a regular array.<p>
+<p><span class="host">Avisynth+</span>  List can be an array of float
+values if supported by the scripting language, or a string containing the
+values printed and separated with spaces.<p>
 
 <p class="var">csp</p>
 <p>The destination format.
@@ -816,17 +833,28 @@ data range, it lies slightly below.</p>
 
 <h3><a id="matrix2020cl"></a>matrix2020cl</h3>
 
-<pre class="proto">fmtc.matrix2020cl (
+<table class="n" width="100%">
+<tr>
+<td class="n"><pre class="proto">fmtc.matrix2020cl (
 	clip    : clip      ;
 	full    : int  : opt; (False)
 	csp     : int  : opt;
 	bits    : int  : opt;
 	cpuopt  : int  : opt; (-1)
-)</pre>
+)</pre></td>
+<td class="n"><pre class="proto">fmtc_matrix2020cl (
+	clip   c,
+	bool   full (false),
+	string csp (undefined),
+	int    bits (undefined),
+	int    cpuopt (-1)
+)</pre></td>
+</tr>
+</table>
 
 <p>Colorspace conversion using the ITU-R BT.2020 constant luminance matrix.</p>
 
-<p>The function converts between <i>linear</i> RGB and Y’Cb’Cr’ colorspaces.
+<p>The function converts between <em>linear</em> RGB and Y’Cb’Cr’ colorspaces.
 This conversion cannot be achieve with a classic linear matrix.
 The output colorspace, hence the direction of the conversion, is automatically
 deduced from the input colorspace.</p>
@@ -849,16 +877,25 @@ frame properties are set according to the transformation.
 The <code>_ColorRange</code> property is set if the <var>full</var>
 parameter has been explicitely defined.</p>
 
+<p><span class="host">Avisynth+</span>If an alpha channel is present in
+both the source and destination colorspaces, it is copied and its bitdepth is
+possibly adapted to the destination format.
+If there is no alpha channel in the source, full opacity is assumed.
+If there is no alpha channel in the destination, the plane is lost.<p>
+
 <h4>Parameters</h4>
 
 <p class="var">clip</p>
 <p>The input clip. Mandatory.
 Supported input formats:</p>
 <ul>
-<li>8-, 9-, 10-, 12-, 14- and 16-bit integer for Y’Cb’Cr’, 16-bit integer for RGB.</li>
+<li>8-, 10-, 12-, 14- and 16-bit integer for Y’Cb’Cr’, 16-bit integer for RGB.</li>
 <li>32-bit floating point.</li>
 <li>YUV and RGB colorspaces.</li>
 </ul>
+<p><span class="host">Vapoursynth</span> 9-bit integer data is supported too.<p>
+<p><span class="host">Avisynth+</span>  Colorspaces with an alpha channel are
+supported too.<p>
 
 <p class="var">full</p>
 <p>Indicates if the Y’Cb’Cr’ clip is full-range (True) or TV-range (False).
@@ -868,17 +905,25 @@ in TV-range (16 to 240 for the YUV chroma planes).
 This value has no meaning for float data.</p>
 
 <p class="var">csp</p>
-<p>The destination format, as Vapoursynth constant.
-It must be compatible with what is logically expected as output (RGB or YUV).
+<p>It must be compatible with what is logically expected as output (RGB or YUV).
 It cannot change the data type (integer or float) nor the chroma subsampling.
-If the output is integer RGB, the bitdepth must be 16.</p>
+If the output is integer RGB, the bitdepth must be 16.
+Only planar colorspaces are allowed.</p>
+<p><span class="host">Vapoursynth</span> The format is a Vapoursynth
+built-in constant.</p>
+<p><span class="host">Avisynth+</span> The format is a string with the
+same kind of content as the result from <code>BuildPixelType</code> or the
+<var>pixel_type</var> parameter from <code>BlankClip</code>.
+For example: <code>"RGBP48"</code>, <code>"YV12"</code>,
+<code>"YUV444PS"</code>…</p>
 
 <p class="var">bits</p>
 <p>Explicit specification of the destination bitdepth.
-The only allowed values are 8, 9, 10, 12, 16 and 32.
+The only allowed values are 8, 10, 12, 14, 16 and 32.
 They are restricted by the output data type and format
 (16 bits for integer RGB).
 Supersedes the bitdepth from <var>csp</var>.</p>
+<p><span class="host">Vapoursynth</span> 9 bits is allowed too.</p>
 
 <p class="var">cpuopt</p>
 <p>Limits the CPU instruction set.
@@ -889,7 +934,9 @@ Supersedes the bitdepth from <var>csp</var>.</p>
 
 <h3><a id="primaries"></a>primaries</h3>
 
-<pre class="proto">fmtc.primaries (
+<table class="n" width="100%">
+<tr>
+<td class="n"><pre class="proto">fmtc.primaries (
 	clip  : clip        ;
 	rs    : float[]: opt;
 	gs    : float[]: opt;
@@ -902,7 +949,23 @@ Supersedes the bitdepth from <var>csp</var>.</p>
 	prims : data   : opt;
 	primd : data   : opt;
 	cpuopt: int    : opt; (-1)
-)</pre>
+)</pre></td>
+<td class="n"><pre class="proto">fmtc_primaries (
+	clip   c,
+	arrayf rs (undefined),
+	arrayf gs (undefined),
+	arrayf bs (undefined),
+	arrayf ws (undefined),
+	arrayf rd (undefined),
+	arrayf gd (undefined),
+	arrayf bd (undefined),
+	arrayf wd (undefined),
+	string prims (undefined),
+	string primd (undefined),
+	int    cpuopt (-1)
+)</pre></td>
+</tr>
+</table>
 
 <p>Performs a gamut conversion given a set of three primary colors and
 a reference white to another set of primary colors and a target reference
@@ -934,15 +997,19 @@ on the target gamut.</p>
 
 <p class="var">clip</p>
 <p>The input clip. Mandatory.
-Supported colorspaces are 16-bit int or 32-bit float <i>linear</i> RGB.
+Supported colorspaces are 16-bit int or 32-bit float <em>linear</em> RGB.
 You should use the <code>transfer</code> function to convert between linear
 RGB and gamma-compressed R’G’B ’colorspaces.</p>
 
 <p class="var">rs, gs, bs, ws</p>
 <p>Primaries for the source colorspace as red, green, blue and reference
 white.
-Each variable is an array of two components, x and y.
+Each variable contains two components, x and y, in this order.
 The y value cannot be null.</p>
+<p><span class="host">Vapoursynth</span> Parameters are regular arrays.<p>
+<p><span class="host">Avisynth+</span>  Parameters can be arrays of two float
+values if supported by the scripting language, or strings containing both
+values printed and separated with a space.<p>
 
 <p class="var">rd, gd, bd, wd</p>
 <p>Primaries for the target colorspace.
@@ -959,7 +1026,7 @@ Possible values are:</p>
 <tr><td><b><code>"470m93"</code></b> or<br /><b><code>"ntscj"</code></b></td><td>R<br />G<br />B<br />W (9305K)</td><td>0.670,<br />0.210,<br />0.140,<br />0.2848,</td><td>0.330<br />0.710<br />0.080<br />0.2932</td><td>ITU-R BT.470-6 System M — Japan (NTSC-J)</td></tr>
 <tr><td><b><code>"470bg"</code></b> or<br /><b><code>"601-625"</code></b> or<br /><b><code>"1358-625"</code></b> or<br /><b><code>"1700-625"</code></b> or<br /><b><code>"pal"</code></b> or<br /><b><code>"secam"</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.640,<br />0.290,<br />0.150,<br />0.3127,</td><td>0.330<br />0.600<br />0.060<br />0.3290</td><td>ITU-R BT.470-6 System B, G (historical)<br />ITU-R BT.601-6 625<br />ITU-R BT.1358 625<br />ITU-R BT.1700 625 PAL and 625 SECAM</td></tr>
 <tr><td><b><code>"170m"</code></b> or<br /><b><code>"240m"</code></b> or<br /><b><code>"601-525"</code></b> or<br /><b><code>"1358-525"</code></b> or<br /><b><code>"1700-525"</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.630,<br />0.310,<br />0.155,<br />0.3127</td><td>0.340<br />0.595<br />0.070<br />0.3290</td><td>SMPTE 170M (2004)<br />SMPTE 240M (1999)<br />ITU-R BT.601-6 525<br />ITU-R BT.1358 525<br />ITU-R BT.1700 NTSC</td></tr>
-<tr><td><b><code>"filmc"</code></b></td><td>R (Wratten 25)<br />G (Wratten 58)<br />B (Wratten 47)<br />W (C)</td><td>0.681,<br />0.243,<br />0.145,<br />0.3100,</td><td>0.319<br />0.692<br />0.049<br />0.3160</td><td>Generic film (colour filters using Illuminant C)</td></tr>
+<tr><td><b><code>"filmc"</code></b></td><td>R&nbsp;(Wratten&nbsp;25)<br />G&nbsp;(Wratten&nbsp;58)<br />B&nbsp;(Wratten&nbsp;47)<br />W (C)</td><td>0.681,<br />0.243,<br />0.145,<br />0.3100,</td><td>0.319<br />0.692<br />0.049<br />0.3160</td><td>Generic film (colour filters using Illuminant C)</td></tr>
 <tr><td><b><code>"2020"</code></b> or<br /><b><code>"2100"</code></b> or<br /><b><code>"uhdtv"</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.70792,<br />0.17024,<br />0.13137,<br />0.31271</td><td>0.29203<br />0.79652<br />0.04588<br />0.32902</td><td>ITU-R BT.2020<br />ITU-R BT.2100</td></tr>
 <tr><td><b><code>"61966-2-2"</code></b> or<br /><b><code>"scrgb"</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.640,<br />0.300,<br />0.150,<br />0.31271</td><td>0.330<br />0.600<br />0.060<br />0.32902</td><td>IEC 61966-2-4 (scRGB)</td></tr>
 <tr><td><b><code>"adobe98"</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.640,<br />0.210,<br />0.150,<br />0.31271</td><td>0.330<br />0.710<br />0.060<br />0.32902</td><td>Adobe RGB (1998)</td></tr>
@@ -992,55 +1059,126 @@ Possible values are:</p>
 
 <h3><a id="resample"></a>resample</h3>
 
-<pre class="proto">fmtc.resample (
-	clip      : clip        ;
-	w         : int    : opt;
-	h         : int    : opt;
-	sx        : float[]: opt; (0)
-	sy        : float[]: opt; (0)
-	sw        : float[]: opt; (0)
-	sh        : float[]: opt; (0)
-	scale     : float  : opt; (0)
-	scaleh    : float  : opt; (0)
-	scalev    : float  : opt; (0)
-	kernel    : data[] : opt; ("spline36")
-	kernelh   : data[] : opt; (kernel)
-	kernelv   : data[] : opt; (kernel)
-	impulse   : float[]: opt;
-	impulseh  : float[]: opt; (impulse)
-	impulsev  : float[]: opt; (impulse)
-	taps      : int[]  : opt; (4)
-	tapsh     : int[]  : opt; (taps)
-	tapsv     : int[]  : opt; (taps)
-	a1        : float[]: opt;
-	a2        : float[]: opt;
-	a3        : float[]: opt;
-	kovrspl   : int[]  : opt; (1)
-	fh        : float[]: opt; (1)
-	fv        : float[]: opt; (1)
-	cnorm     : int[]  : opt; (True)
-	totalh    : float[]: opt; (0)
-	totalv    : float[]: opt; (0)
-	invks     : int[]  : opt; (False)
-	invksh    : int[]  : opt; (invks)
-	invksv    : int[]  : opt; (invks)
-	invkstaps : int[]  : opt; (4)
-	invkstapsh: int[]  : opt; (invkstaps)
-	invkstapsv: int[]  : opt; (invkstaps)
-	csp       : int    : opt;
-	css       : data   : opt;
-	planes    : float[]: opt; (all)
-	fulls     : int    : opt; (depends on the colorspace)
-	fulld     : int    : opt; (fulls)
-	center    : int[]  : opt; (True)
-	cplace    : data   : opt; ("mpeg2")
-	cplaces   : data   : opt; (cplace)
-	cplaced   : data   : opt; (cplace)
-	interlaced: int    : opt; (2)
-	tff       : int    : opt; (2)
-	flt       : int    : opt; (False)
-	cpuopt    : int    : opt; (-1)
-)</pre>
+<table class="n" width="100%">
+<tr>
+<td class="n"><pre class="proto">fmtc.resample (
+	clip       : clip        ;
+	w          : int    : opt;
+	h          : int    : opt;
+	sx         : float[]: opt; (0)
+	sy         : float[]: opt; (0)
+	sw         : float[]: opt; (0)
+	sh         : float[]: opt; (0)
+	scale      : float  : opt; (0)
+	scaleh     : float  : opt; (0)
+	scalev     : float  : opt; (0)
+	kernel     : data[] : opt; ("spline36")
+	kernelh    : data[] : opt; (kernel)
+	kernelv    : data[] : opt; (kernel)
+	impulse    : float[]: opt;
+	impulseh   : float[]: opt; (impulse)
+	impulsev   : float[]: opt; (impulse)
+	taps       : int[]  : opt; (4)
+	tapsh      : int[]  : opt; (taps)
+	tapsv      : int[]  : opt; (taps)
+	a1         : float[]: opt;
+	a2         : float[]: opt;
+	a3         : float[]: opt;
+	a1h        : float[]: opt; (a1)
+	a2h        : float[]: opt; (a2)
+	a3h        : float[]: opt; (a3)
+	a1v        : float[]: opt; (a1)
+	a2v        : float[]: opt; (a2)
+	a3v        : float[]: opt; (a3)
+	kovrspl    : int[]  : opt; (1)
+	fh         : float[]: opt; (1)
+	fv         : float[]: opt; (1)
+	cnorm      : int[]  : opt; (True)
+	total      : float[]: opt; (0)
+	totalh     : float[]: opt; (total)
+	totalv     : float[]: opt; (total)
+	invks      : int[]  : opt; (False)
+	invksh     : int[]  : opt; (invks)
+	invksv     : int[]  : opt; (invks)
+	invkstaps  : int[]  : opt; (4)
+	invkstapsh : int[]  : opt; (invkstaps)
+	invkstapsv : int[]  : opt; (invkstaps)
+	csp        : int    : opt;
+	css        : data   : opt;
+	planes     : float[]: opt; (3)
+	fulls      : int    : opt; (depends)
+	fulld      : int    : opt; (fulls)
+	center     : int[]  : opt; (True)
+	cplace     : data   : opt; ("mpeg2")
+	cplaces    : data   : opt; (cplace)
+	cplaced    : data   : opt; (cplace)
+	interlaced : int    : opt; (2)
+	interlacedd: int    : opt; (interlaced)
+	tff        : int    : opt; (2)
+	tffd       : int    : opt; (tff)
+	flt        : int    : opt; (False)
+	cpuopt     : int    : opt; (-1)
+)</pre></td>
+<td class="n"><pre class="proto">fmtc_resample (
+	clip   c,
+	int    w (undefined),
+	int    h (undefined),
+	arrayf sx (0),
+	arrayf sy (0),
+	arrayf sw (0),
+	arrayf sh (0),
+	float  scale  (0),
+	float  scaleh (0),
+	float  scalev (0),
+	string kernel  ("spline36"),
+	string kernelh (kernel),
+	string kernelv (kernel),
+	arrayf impulse  (undefined),
+	arrayf impulseh (impulse),
+	arrayf impulsev (impulse),
+	arrayi taps (4),
+	arrayi tapsh (taps),
+	arrayi tapsv (taps),
+	arrayf a1 (undefined),
+	arrayf a2 (undefined),
+	arrayf a3 (undefined),
+	arrayf a1h (a1),
+	arrayf a2h (a2),
+	arrayf a3h (a3),
+	arrayf a1v (a1),
+	arrayf a2v (a2),
+	arrayf a3v (a3),
+	int    kovrspl (1),
+	arrayf fh (1),
+	arrayf fv (1),
+	bool   cnorm (true),
+	arrayf total (0),
+	arrayf totalh (total),
+	arrayf totalv (total),
+	arrayb invks  (false),
+	arrayb invksh (invks),
+	arrayb invksv (invks),
+	arrayi invkstaps  (4),
+	arrayi invkstapsh (invkstaps),
+	arrayi invkstapsv (invkstaps),
+	string csp (undefined),
+	string css (undefined),
+	arrayf planes (3),
+	int    fulls (depends),
+	int    fulld (fulls),
+	arrayb center (true),
+	string cplace  ("mpeg2"),
+	string cplaces (cplace),
+	string cplaced (cplace),
+	int    interlaced (2),
+	int    interlacedd (interlaced),
+	int    tff (2),
+	int    tffd (ttf),
+	bool   flt (false),
+	int    cpuopt (-1)
+)</pre></td>
+</tr>
+</table>
 
 <p>Resizes the planes of a clip.
 This function can change the chroma subsampling.</p>
@@ -1070,6 +1208,8 @@ When specifying less than 3 values, the last specified value will be reused
 for the next planes.
 However <var>planes</var> works slightly differently, check the related
 paragraph for details.</p>
+<p><span class="host">Avisynth+</span> Arrays can be specified as values
+printed in a string and separated with spaces.</p>
 
 <p>Note: field resizing is not always the best way to handle interlaced content,
 especially for upscales.
@@ -1088,8 +1228,7 @@ If you do so, don’t forget to set:</p>
 processed even if its size doesn’t change,</li>
 	<li><var>cnorm</var> to false to avoid automatic kernel
 normalisation if your impulse is already normalised, or specify
-<var>totalv</var> or <var>totalh</var> if the normalisation factor
-is not the sum of the impulse</li>
+<var>total</var> if the normalisation factor is not the sum of the impulse</li>
 	<li>and <var>center</var> to False to keep the desired spacing
 between the sampling points.</li>
 </ul>
@@ -1161,12 +1300,12 @@ Possible values are:</p>
 <tr><td><b><code>"spline16"</code></b></td><td>Standard cubic spline based kernel, 4 sample points. Same as <code>Spline16Resize</code>.</td></tr>
 <tr><td><b><code>"spline36"</code></b></td><td>Spline, 6 sample points. Same as <code>Spline36Resize</code>.</td></tr>
 <tr><td><b><code>"spline64"</code></b></td><td>Spline, 8 sample points. Same as <code>Spline64Resize</code>.</td></tr>
-<tr><td><b><code>"spline"</code></b></td><td>Generic <i>natural</i> cubic splines, number of sample points is twice the <var>taps</var> parameter, so you can use <var>taps&nbsp;= 6</var> to get a more or less <code>Spline144Resize</code> equivalent.</td></tr>
+<tr><td><b><code>"spline"</code></b></td><td>Generic <em>natural</em> cubic splines, number of sample points is twice the <var>taps</var> parameter, so you can use <var>taps&nbsp;= 6</var> to get a more or less <code>Spline144Resize</code> equivalent.</td></tr>
 <tr><td><b><code>"gauss"</code></b> or<br /><b><code>"gaussian"</code></b></td><td>Gaussian kernel. The p parameter is mapped on <var>a1</var> and controls the curve width. The higher p, the sharper. It is set to 30 by default. This resizer is the same as <code>GaussResize</code>, but <var>taps</var> offers a control on the filter impulse length. For low p values (soft and blurry), it’s better to increase the number of taps to avoid truncating the gaussian curve too early and creating artifacts.</td></tr>
 <tr><td><b><code>"sinc"</code></b></td><td>Truncated sinc function. Use <var>taps</var> to control its length. Same as <code>SincResize</code>.</td></tr>
 </table>
 
-<p class="var">impulse, impulsew, impulseh</p>
+<p class="var">impulse, impulseh, impulsev</p>
 <p>Offers the possibility to create your own kernel (useful for convolutions).
 Add your coefficents in the array.
 The number of coefficients must be odd.
@@ -1181,7 +1320,7 @@ of downscaling, the actual number of sample points may be greater than the
 specified value.
 Range: 1&ndash;128</p>
 
-<p class="var">a1, a2, a3</p>
+<p class="var">a1, a2, a3,&emsp;a1h, a2h, a3h,&emsp;a1v, a2v, a3v</p>
 <p>Specific parameters, depending on the selected kernel.</p>
 
 <p class="var">kovrspl</p>
@@ -1209,7 +1348,7 @@ constant for all pixels.
 If you use the resizer as a convolution engine, it is advised to disable the
 normalisation.</p>
 
-<p class="var">totalh, totalv</p>
+<p class="var">total, totalh, totalv</p>
 <p>When <var>cnorm</var> is activated, these parameters specify the
 normalisation value for the corresponding kernel.
 0 means that the normalisation value is the sum of the coefficients.
@@ -1218,7 +1357,10 @@ for this use: <var>total</var>&nbsp;= <var>totalh</var> &times; <var>totalv</var
 Because the convolution is computed with floating point data, there is no
 saturation of intermediate results, therefore the balance between
 <var>totalh</var> and <var>totalv</var> is not important, only their product
-will be taken into account.</p>
+will be taken into account.
+Note that because kernels are single-dimention, the “parent” <var>total</var>
+parameter here is the sum of the coefficients for each direction, not the
+product of <var>totalh</var> and <var>totalv</var>.</p>
 
 <p class="var">invks, invksh, invksv</p>
 <p>Set these parameter to True to activate the kernel inversion mode for the
@@ -1243,12 +1385,16 @@ Use it as a tradeof between softness and ringing.
 Range: 1&ndash;128</p>
 
 <p class="var">csp</p>
-<p>The destination format, as Vapoursynth constant.
-Can only change the bitdepth and the data type (integer or float).
+<p>Can only change the bitdepth and the data type (integer or float).
 Only 16-bit integer (xxxP16) and 32-bit float data types are allowed.</p>
+<p><span class="host">Vapoursynth</span> The format is a Vapoursynth
+built-in constant.</p>
+<p><span class="host">Avisynth+</span> The format is a string with the
+same kind of content as the result from <code>BuildPixelType</code> or the
+<var>pixel_type</var> parameter from <code>BlankClip</code>.</p>
 
 <p class="var">css</p>
-<p>Destination chroma subsampling, for YUV and YCgCo colorspaces.
+<p>Destination chroma subsampling, for YUV (and YCgCo) colorspaces.
 Supersedes the chroma subsampling from <var>csp</var>.
 You can also specify the subsampling with the predefined values
 or with a two-digit string.
@@ -1273,7 +1419,7 @@ in Masktools 2.</p>
 <table>
 <tr><td><b>&minus;65535</b><br />to <b>&plus;0.5</b></td><td>All the pixels of the plane will be set to &minus;x (the opposite of the specified value). The range depends on the output data type. Remember, in floating-point YUV, the chroma planes range from &minus;0.5 to &plus;0.5.</td></tr>
 <tr><td><b>1</b></td><td>The plane will not be processed. This means that the content of the output plane is pure garbage.</td></tr>
-<tr><td><b>2</b></td><td>The plane of the input clip will be copied and possibly cropped. Areas out of the input picture are left unprocessed. Range (full or TV) conversions are ignored.</td></tr>
+<tr><td><b>2</b></td><td>The plane of the input clip will be copied and possibly cropped. Areas out of the input picture are left unprocessed (garbage). Range (full or TV) conversions are ignored.</td></tr>
 <tr><td><b>3</b></td><td>The plane will be processed.</td></tr>
 </table>
 
@@ -1294,8 +1440,8 @@ Pixel values are not clipped during a conversion between two TV-range
 formats.</p>
 
 <p class="var">center</p>
-<p>Like the Avisynth resizers, this resizer preserves the position of the
-picture center.
+<p>Like the Avisynth standard resizers, this resizer preserves the position of
+the picture center.
 Disable this parameter if you may want to resize by preserving the top-left
 corner position.
 Similarly, if you are convolving without resizing, setting it to
@@ -1436,7 +1582,9 @@ If it’s not the case, floating point operations are silently used as fallback.
 
 <h3><a id="transfer"></a>transfer</h3>
 
-<pre class="proto">fmtc.transfer (
+<table class="n" width="100%">
+<tr>
+<td class="n"><pre class="proto">fmtc.transfer (
 	clip       : clip        ;
 	transs     : data[] : opt;
 	transd     : data[] : opt;
@@ -1450,7 +1598,26 @@ If it’s not the case, floating point operations are silently used as fallback.
 	logceid    : int    : opt; (800)
 	cpuopt     : int    : opt; (-1)
 	blacklvl   : float  : opt; (0)
-)</pre>
+	planes     : float[]: opt; (3)
+)</pre></td>
+<td class="n"><pre class="proto">fmtc_transfer (
+	clip   c,
+	string transs (undefined),
+	string transd (undefined),
+	float  cont (1),
+	float  gcor (1),
+	int    bits (undefined),
+	bool   flt (undefined),
+	bool   fulls (true),
+	bool   fulld (true),
+	int    logceis (800),
+	int    logceid (800),
+	int    cpuopt (-1),
+	float  blacklvl (0),
+	arrayf planes (3)
+)</pre></td>
+</tr>
+</table>
 
 <p>Applies electro-optical and opto-electrical transfer characteristics to the
 video signal to convert between linear and gamma-corrected modes.</p>
@@ -1471,6 +1638,8 @@ bitdepth.</p>
 requirement of the functions.</p>
 <p>The function sets the <code>_ColorRange</code> and <code>_Transfer</code>
 frame properties.</p>
+<p><span class="host">Avisynth+</span>  Colorspaces with an alpha channel are
+supported too, but the channel is left untouched.<p>
 
 <h4>Parameters</h4>
 
@@ -1485,45 +1654,47 @@ Supported input formats:</p>
 
 <p class="var">transs, transd</p>
 <p>Transfer characteristics for input and output, respectively.
-The characteristic is direct or inverted according to where it is applied
-(output or input).
-The curve set is the same as in ISO/IEC 23008-2 (HEVC), with a few
-additions.</p>
+The characteristic may be an OETF (opto-electronic transfer function), an
+EOTF (eletro-optical transfer function), or just remain unspecified.
+It is direct or inverted according to where it is applied, output or input.
+The intermediate state is assumed linear light.
+The curve set is the same as the list in ISO/IEC 23008-2 (HEVC), with a few
+additions from various camera manufacturers or NLE systems.</p>
 <p>Most curves map their value from the 0–1 range to 0–1, but some are for
 high dynamic range or wide gamut signals and locate their value for peak white
 much higher.</p>
 <table>
-<tr><th>Value</th><th>Linear range</th><th>Description</th></tr>
-<tr><td><b><code>&quot;709&quot;       </code></b></td><td>0&hellip;1</td><td>ITU-R BT.709</td></tr>
-<tr><td><b><code>&quot;470m&quot;      </code></b></td><td>0&hellip;1</td><td>ITU-R BT.470-6 System M, FCC (assumed display gamma 2.2)<br />Actually uses the same curve as IEC 61966-2-1.</td></tr>
-<tr><td><b><code>&quot;470bg&quot;     </code></b></td><td>0&hellip;1</td><td>ITU-R BT.470-6 System B, G (assumed display gamma 2.8)</td></tr>
-<tr><td><b><code>&quot;601&quot;       </code></b></td><td>0&hellip;1</td><td>ITU-R BT.601</td></tr>
-<tr><td><b><code>&quot;240&quot;       </code></b></td><td>0&hellip;1</td><td>SMPTE 240M</td></tr>
-<tr><td><b><code>&quot;linear&quot;<br />&quot;&quot;</code></b></td><td>Unspecified</td><td>Linear (bypass)</td></tr>
-<tr><td><b><code>&quot;log100&quot;    </code></b></td><td>0&hellip;1</td><td>Logarithmic transfer characteristic (100:1 range)</td></tr>
-<tr><td><b><code>&quot;log316&quot;    </code></b></td><td>0&hellip;1</td><td>Logarithmic transfer characteristic (100*Sqrt(10):1 range)</td></tr>
-<tr><td><b><code>&quot;61966-2-4&quot; </code></b></td><td>Unspecified</td><td>IEC 61966-2-4, xvYCC. Same as BT.709, but with an extended range, inlcuding negative values.</td></tr>
-<tr><td><b><code>&quot;1361&quot;      </code></b></td><td>&minus;0.25&hellip;1.33</td><td>ITU-R BT.1361 extended colour gamut system</td></tr>
-<tr><td><b><code>&quot;61966-2-1&quot;<br />&quot;srgb&quot;<br />&quot;sycc&quot;</code></b></td><td>0&hellip;1</td><td>IEC 61966-2-1, sRGB or sYCC</td></tr>
-<tr><td><b><code>&quot;2020_10&quot;   </code></b></td><td>0&hellip;1</td><td>ITU-R BT.2020 for 10-bit system</td></tr>
-<tr><td><b><code>&quot;2020_12&quot;<br />&quot;2020&quot;</code></b></td><td>0&hellip;1</td><td>ITU-R BT.2020 for 12-bit system</td></tr>
-<tr><td><b><code>&quot;2084&quot;      </code></b></td><td>0&hellip;1</td><td>SMPTE ST 2084 for 10, 12, 14 and 16-bit systems<br />ITU-R BT.2100-2 PQ (perceptual quantization)<br />Linear 1.0 is peak white and corresponds to a display luminance level of 10&nbsp;000 cd/m<sup>2</sup>.</td></tr>
-<tr><td><b><code>&quot;428&quot;       </code></b></td><td>0&hellip;1</td><td>SMPTE ST 428-1<br />Linear 1.0 is peak white and corresponds to a display luminance level of 48 cd/m<sup>2</sup>.</td></tr>
-<tr><td><b><code>&quot;hlg&quot;       </code></b></td><td>0&hellip;1</td><td>ITU-R BT.2100 hybrid log-gamma, ARIB STD-B67</td></tr>
-<tr><td><b><code>&quot;1886&quot;      </code></b></td><td>0&hellip;1</td><td>ITU-R BT.1886. This is an EOTF for display mimicing CRTs.</td></tr>
-<tr><td><b><code>&quot;1886a&quot;     </code></b></td><td>0&hellip;1</td><td>ITU-R BT.1886, alternative approximation</td></tr>
-<tr><td><b><code>&quot;filmstream&quot;</code></b></td><td>0&hellip;1</td><td>Thomson FilmStream<br />Linear 1.0 is the sensor clipping level, corresponding to 3840 on a linear 12-bit scale.</td></tr>
-<tr><td><b><code>&quot;slog&quot;      </code></b></td><td>&minus;0.006&hellip;10</td><td>Sony S-Log<br />Linear 1.0 is the reference white, peak white is at 10.0.</td></tr>
-<tr><td><b><code>&quot;slog2&quot;      </code></b></td><td>&minus;0.0085&hellip;14.13</td><td>Sony S-Log 2<br />Linear 1.0 is the reference white, peak white is at 14.13.</td></tr>
-<tr><td><b><code>&quot;slog3&quot;     </code></b></td><td>0&hellip;38.421</td><td>Sony S-Log3.</td></tr>
-<tr><td><b><code>&quot;logc2&quot;     </code></b></td><td>Unspecified</td><td>Arri Log C Alexa 2.x, linear scene exposure<br />Peak white is 57.45 linear. The negative part of the range allows coding sensor noise. <var>logceis</var> and <var>logceid</var> set the Exposure Index (EI).</td></tr>
-<tr><td><b><code>&quot;logc3&quot;     </code></b></td><td>Unspecified</td><td>Arri Log C Alexa 3.x, linear scene exposure<br />Peak white is 55.08 linear. The negative part of the range allows coding sensor noise. <var>logceis</var> and <var>logceid</var> set the Exposure Index (EI).</td></tr>
-<tr><td><b><code>&quot;canonlog&quot;  </code></b></td><td>0&hellip;8.00903</td><td>Canon-Log<br />Peak white is 8.00903 in linear scale and 1.08676 in compressed scale.</td></tr>
-<tr><td><b><code>&quot;adobergb&quot;  </code></b></td><td>0&hellip;1</td><td>Adobe RGB (1998 and Wide Gamut)</td></tr>
-<tr><td><b><code>&quot;romm&quot;      </code></b></td><td>0&hellip;1</td><td>ProPhoto, ROMM</td></tr>
-<tr><td><b><code>&quot;acescc&quot;    </code></b></td><td>&minus;65504&hellip;65504</td><td>ACEScc. Values are actually bounded to the ACES 16-bit float range.</td></tr>
-<tr><td><b><code>&quot;erimm&quot;     </code></b></td><td>0&hellip;316.2</td><td>ERIMM</td></tr>
-<tr><td><b><code>&quot;vlog&quot;     </code></b></td><td>0&hellip;1</td><td>Panasonic V-Log</td></tr>
+<tr><th>Value</th><th>Linear range</th><th>Type</th><th>Description</th></tr>
+<tr><td><b><code>&quot;709&quot;       </code></b></td><td>0&hellip;1</td><td>OETF</td><td>ITU-R BT.709</td></tr>
+<tr><td><b><code>&quot;470m&quot;      </code></b></td><td>0&hellip;1</td><td></td><td>ITU-R BT.470-6 System M, FCC (assumed display gamma 2.2)<br />Actually uses the same curve as IEC 61966-2-1.</td></tr>
+<tr><td><b><code>&quot;470bg&quot;     </code></b></td><td>0&hellip;1</td><td></td><td>ITU-R BT.470-6 System B, G (assumed display gamma 2.8)</td></tr>
+<tr><td><b><code>&quot;601&quot;       </code></b></td><td>0&hellip;1</td><td>OETF</td><td>ITU-R BT.601</td></tr>
+<tr><td><b><code>&quot;240&quot;       </code></b></td><td>0&hellip;1</td><td></td><td>SMPTE 240M</td></tr>
+<tr><td><b><code>&quot;linear&quot;<br />&quot;&quot;</code></b></td><td>Unspecified</td><td></td><td>Linear (bypass)</td></tr>
+<tr><td><b><code>&quot;log100&quot;    </code></b></td><td>0&hellip;1</td><td></td><td>Logarithmic transfer characteristic (100:1 range)</td></tr>
+<tr><td><b><code>&quot;log316&quot;    </code></b></td><td>0&hellip;1</td><td></td><td>Logarithmic transfer characteristic (100*Sqrt(10):1 range)</td></tr>
+<tr><td><b><code>&quot;61966-2-4&quot; </code></b></td><td>Unspecified</td><td>OETF</td><td>IEC 61966-2-4, xvYCC. Same as BT.709, but with an extended range, including negative values.</td></tr>
+<tr><td><b><code>&quot;1361&quot;      </code></b></td><td>&minus;0.25&hellip;1.33</td><td></td><td>ITU-R BT.1361 extended colour gamut system</td></tr>
+<tr><td><b><code>&quot;61966-2-1&quot;<br />&quot;srgb&quot;<br />&quot;sycc&quot;</code></b></td><td>0&hellip;1</td><td>EOTF</td><td>IEC 61966-2-1, sRGB or sYCC</td></tr>
+<tr><td><b><code>&quot;2020_10&quot;   </code></b></td><td>0&hellip;1</td><td></td><td>ITU-R BT.2020 for 10-bit system</td></tr>
+<tr><td><b><code>&quot;2020_12&quot;<br />&quot;2020&quot;</code></b></td><td>0&hellip;1</td><td></td><td>ITU-R BT.2020 for 12-bit system</td></tr>
+<tr><td><b><code>&quot;2084&quot;      </code></b></td><td>0&hellip;1</td><td>EOTF</td><td>SMPTE ST 2084 for 10, 12, 14 and 16-bit systems<br />ITU-R BT.2100-2 PQ (perceptual quantization)<br />Linear 1.0 is peak white and corresponds to a display luminance level of 10&nbsp;000 cd/m<sup>2</sup>.</td></tr>
+<tr><td><b><code>&quot;428&quot;       </code></b></td><td>0&hellip;1</td><td></td><td>SMPTE ST 428-1<br />Linear 1.0 is peak white and corresponds to a display luminance level of 48 cd/m<sup>2</sup>.</td></tr>
+<tr><td><b><code>&quot;hlg&quot;       </code></b></td><td>0&hellip;1</td><td>OETF</td><td>ITU-R BT.2100 HLG (hybrid log-gamma), ARIB STD-B67</td></tr>
+<tr><td><b><code>&quot;1886&quot;      </code></b></td><td>0&hellip;1</td><td>EOTF</td><td>ITU-R BT.1886. Intended to mimicing a CRT display curve.</td></tr>
+<tr><td><b><code>&quot;1886a&quot;     </code></b></td><td>0&hellip;1</td><td>EOTF</td><td>ITU-R BT.1886, alternative approximation</td></tr>
+<tr><td><b><code>&quot;filmstream&quot;</code></b></td><td>0&hellip;1</td><td>OETF?</td><td>Thomson FilmStream<br />Linear 1.0 is the sensor clipping level, corresponding to 3840 on a linear 12-bit scale.</td></tr>
+<tr><td><b><code>&quot;slog&quot;      </code></b></td><td>&minus;0.006&hellip;10</td><td>OETF?</td><td>Sony S-Log<br />Linear 1.0 is the reference white, peak white is at 10.0.</td></tr>
+<tr><td><b><code>&quot;slog2&quot;      </code></b></td><td>&minus;0.0085&hellip;14.13</td><td>OETF?</td><td>Sony S-Log 2<br />Linear 1.0 is the reference white, peak white is at 14.13.</td></tr>
+<tr><td><b><code>&quot;slog3&quot;     </code></b></td><td>0&hellip;38.421</td><td>OETF?</td><td>Sony S-Log3.</td></tr>
+<tr><td><b><code>&quot;logc2&quot;     </code></b></td><td>Unspecified</td><td>OETF?</td><td>Arri Log C Alexa 2.x, linear scene exposure<br />Peak white is 57.45 linear. The negative part of the range allows coding sensor noise. <var>logceis</var> and <var>logceid</var> set the Exposure Index (EI).</td></tr>
+<tr><td><b><code>&quot;logc3&quot;     </code></b></td><td>Unspecified</td><td>OETF?</td><td>Arri Log C Alexa 3.x, linear scene exposure<br />Peak white is 55.08 linear. The negative part of the range allows coding sensor noise. <var>logceis</var> and <var>logceid</var> set the Exposure Index (EI).</td></tr>
+<tr><td><b><code>&quot;canonlog&quot;  </code></b></td><td>0&hellip;8.00903</td><td>OETF</td><td>Canon-Log<br />Peak white is 8.00903 in linear scale and 1.08676 in compressed scale.</td></tr>
+<tr><td><b><code>&quot;adobergb&quot;  </code></b></td><td>0&hellip;1</td><td></td><td>Adobe RGB (1998 and Wide Gamut)</td></tr>
+<tr><td><b><code>&quot;romm&quot;      </code></b></td><td>0&hellip;1</td><td></td><td>ProPhoto, ROMM</td></tr>
+<tr><td><b><code>&quot;acescc&quot;    </code></b></td><td>&minus;65504&hellip;65504</td><td></td><td>ACEScc. Values are actually bounded to the ACES 16-bit float range.</td></tr>
+<tr><td><b><code>&quot;erimm&quot;     </code></b></td><td>0&hellip;316.2</td><td>OETF</td><td>ERIMM</td></tr>
+<tr><td><b><code>&quot;vlog&quot;     </code></b></td><td>0&hellip;1</td><td></td><td>Panasonic V-Log</td></tr>
 </table>
 
 <p class="var">cont</p>
@@ -1579,6 +1750,23 @@ The parameter should be &ge; 0.
 There is no specific unit, it’s just a value from the target linear range,
 generally in 0–1.</p>
 
+<p class="var">planes</p>
+<p>This array decribes how each plane should be processed.
+It’s similar to the <var>y</var>, <var>u</var> and <var>v</var> parameters
+in Masktools 2.</p>
+<table>
+<tr><td><b>&minus;65535</b><br />to <b>&plus;0.5</b></td><td>All the pixels of the plane will be set to &minus;x (the opposite of the specified value). The range depends on the output data type. Remember, in floating-point YUV, the chroma planes range from &minus;0.5 to &plus;0.5.</td></tr>
+<tr><td><b>1</b></td><td>The plane will not be processed. This means that the content of the output plane is pure garbage.</td></tr>
+<tr><td><b>2</b></td><td>The plane of the input clip will be copied and possibly cropped. Range (full or TV) conversions are ignored.</td></tr>
+<tr><td><b>3</b></td><td>The plane will be processed.</td></tr>
+</table>
+<p><span class="host">Avisynth+</span>  The alpha channel processing is
+disabled and replaced with a straight copy from the source.
+The parameter value can also be a string, like in the
+<code>fmtc_bitdepth</code> function: <code>"all"</code>, <code>""</code>, or a
+combination of <code>"0"</code>, <code>"1"</code>, <code>"2"</code>,
+<code>"r"</code>, <code>"g"</code> and <code>"b"</code>.<p>
+
 
 
 <h3><a id="stack16tonative"></a>stack16tonative, nativetostack16</h3>
@@ -1618,7 +1806,19 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 
 <h2><a id="changelog"></a>V) Changelog</h2>
 
-<p><b>r24, 202?-??-??</b></p>
+<p><b>r25, 2021-09-19</b></p>
+<ul>
+<li><code>bitdepth</code>/Avisynth+: fixed I420 input that couldn’t be converted to higher bitdepth. Thanks to StvG for the report.</li>
+<li><code>matrix</code>: fixed the output colorspace autodetection which failed with specific matrix combinations.</li>
+<li><code>resample</code>/Avisynth+: fixed <var>fulls</var> and <var>fulld</var> parameters which were wrongly defined as <code>int</code> instead of <code>bool</code>.</li>
+<li><code>resample</code>/Avisynth+: fixed <var>cplaced</var> which was wrongly copied from <var>cplaces</var>. Thanks to TbtBI for the report.</li>
+<li><code>transfer</code>: automatically adapts the output format (16-bit integer) if the input is a low-bitdepth clip and nothing is specified in <var>bits</var> nor <var>flt</var>, instead of emitting an error.</li>
+<li><code>transfer</code>: fixed the BT.2100 HLG curve that was inverted.</li>
+<li><code>transfer</code>: fixed the sRGB curve linear part and extended its positive range. Thanks to poisondeathray for the report.</li>
+<li>Avisynth+: fixed a crash occuring when using data bitdepths between 9 and 14. Thanks to tormento for the report.</li>
+</ul>
+
+<p><b>r24, 2021-08-16</b></p>
 <ul>
 <li><code>bitdepth</code>: added dithering <var>mode</var> 9: quasirandom sequences.</li>
 <li><code>bitdepth</code>: added a triangular probability distribution function (TPDF) for the dithering patterns and noises, along with the associated parameters <var>tpdfo</var> and <var>tpdfn</var>.</li>
@@ -1626,8 +1826,12 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <li><code>bitdepth</code>: fixed crash when trying to change the range (full or TV) without reducing the bitdepth.</li>
 <li><code>matrix</code>: deletes the <code>_Matrix</code> and <code>_ColorSpace</code> properties if a non-standard matrix is used.</li>
 <li><code>matrix2020cl</code>: sets the <code>_Matrix</code> and <code>_Transfer</code> frame properties.</li>
-<li><code>matrix2020cl</code>: fixed hideous colors with slightly out-of-colorspace values when converting from integer Y’Cb’Cr’ to integer linear RGB.</li>
+<li><code>matrix2020cl</code>: fixed hideous colors when converting slightly out-of-colorspace values from integer Y’Cb’Cr’ to integer linear RGB.</li>
+<li><code>resample</code>: <var>totalh</var> and <var>totalv</var> are now correctly taken into account, added <var>total</var> parameter too.</li>
+<li><code>resample</code>: added a <var>planes</var> parameter.</li>
 <li><code>transfer</code>: sYCC curve (similar to sRGB) now supports signed values.</li>
+<li><code>transfer</code>: added a <var>planes</var> parameter.</li>
+<li>Added support for Avisynth+</li>
 <li>Added information on functions reading and writing frame properties.</li>
 <li>Added support for 14-bit data.</li>
 <li>Vapoursynth: still uses API v3.6 but can use Python constants from API v4.0.</li>

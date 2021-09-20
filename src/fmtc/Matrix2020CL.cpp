@@ -81,7 +81,7 @@ Matrix2020CL::Matrix2020CL (const ::VSMap &in, ::VSMap &out, void *user_data_ptr
 	{
 		throw_inval_arg ("input must be 4:4:4.");
 	}
-	if (fmt_src.numPlanes != NBR_PLANES)
+	if (fmt_src.numPlanes != _nbr_planes_proc)
 	{
 		throw_inval_arg ("greyscale format not supported.");
 	}
@@ -102,7 +102,7 @@ Matrix2020CL::Matrix2020CL (const ::VSMap &in, ::VSMap &out, void *user_data_ptr
 	}
 	if (   vsutl::is_vs_rgb (fmt_src.colorFamily)
 	    && fmt_src.sampleType    == ::stInteger
-		 && fmt_src.bitsPerSample != RGB_INT_BITS)
+		 && fmt_src.bitsPerSample != _rgb_int_bits)
 	{
 		throw_inval_arg ("input clip: RGB depth cannot be less than 16 bits.");
 	}
@@ -127,7 +127,7 @@ Matrix2020CL::Matrix2020CL (const ::VSMap &in, ::VSMap &out, void *user_data_ptr
 	}
 	if (   vsutl::is_vs_rgb (fmt_dst.colorFamily)
 	    && fmt_dst.sampleType    == ::stInteger
-	    && fmt_dst.bitsPerSample != RGB_INT_BITS)
+	    && fmt_dst.bitsPerSample != _rgb_int_bits)
 	{
 		throw_inval_arg ("output clip: RGB depth cannot be less than 16 bits.");
 	}
@@ -217,41 +217,12 @@ const ::VSFrameRef *	Matrix2020CL::get_frame (int n, int activation_reason, void
 		);
 		const ::VSFrameRef & src = *src_sptr;
 
-		const int      w  =  _vsapi.getFrameWidth (&src, 0);
-		const int      h  =  _vsapi.getFrameHeight (&src, 0);
+		const int      w = _vsapi.getFrameWidth (&src, 0);
+		const int      h = _vsapi.getFrameHeight (&src, 0);
 		dst_ptr = _vsapi.newVideoFrame (_vi_out.format, w, h, &src, &core);
 
-		uint8_t * const   dst_ptr_arr [fmtcl::Matrix2020CLProc::NBR_PLANES] =
-		{
-			_vsapi.getWritePtr (dst_ptr, 0),
-			_vsapi.getWritePtr (dst_ptr, 1),
-			_vsapi.getWritePtr (dst_ptr, 2)
-		};
-		const int         dst_str_arr [fmtcl::Matrix2020CLProc::NBR_PLANES] =
-		{
-			_vsapi.getStride (dst_ptr, 0),
-			_vsapi.getStride (dst_ptr, 1),
-			_vsapi.getStride (dst_ptr, 2)
-		};
-		const uint8_t * const
-		                  src_ptr_arr [fmtcl::Matrix2020CLProc::NBR_PLANES] =
-		{
-			_vsapi.getReadPtr (&src, 0),
-			_vsapi.getReadPtr (&src, 1),
-			_vsapi.getReadPtr (&src, 2)
-		};
-		const int         src_str_arr [fmtcl::Matrix2020CLProc::NBR_PLANES] =
-		{
-			_vsapi.getStride (&src, 0),
-			_vsapi.getStride (&src, 1),
-			_vsapi.getStride (&src, 2)
-		};
-
-		_proc_uptr->process (
-			dst_ptr_arr, dst_str_arr,
-			src_ptr_arr, src_str_arr,
-			w, h
-		);
+		const auto     pa { build_mat_proc (_vsapi, *dst_ptr, src) };
+		_proc_uptr->process (pa);
 
 		// Output frame properties
 		::VSMap &      dst_prop = *(_vsapi.getFramePropsRW (dst_ptr));
@@ -289,6 +260,11 @@ const ::VSFrameRef *	Matrix2020CL::get_frame (int n, int activation_reason, void
 
 
 
+constexpr int	Matrix2020CL::_nbr_planes_proc;
+constexpr int	Matrix2020CL::_rgb_int_bits;
+
+
+
 const ::VSFormat &	Matrix2020CL::get_output_colorspace (const ::VSMap &in, ::VSMap &out, ::VSCore &core, const ::VSFormat &fmt_src) const
 {
 	const ::VSFormat *   fmt_dst_ptr = &fmt_src;
@@ -306,7 +282,7 @@ const ::VSFormat &	Matrix2020CL::get_output_colorspace (const ::VSMap &in, ::VSM
 		col_fam = ::cmRGB;
 		if (spl_type == ::stInteger)
 		{
-			bits = RGB_INT_BITS;
+			bits = _rgb_int_bits;
 		}
 	}
 

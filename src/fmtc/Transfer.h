@@ -30,14 +30,14 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fstb/def.h"
 
 #include "fmtcl/TransCurve.h"
-#include "fmtcl/TransLut.h"
+#include "fmtcl/TransModel.h"
 #include "fmtcl/TransOpInterface.h"
 #include "fmtcl/TransOpLogC.h"
 #include "vsutl/FilterBase.h"
 #include "vsutl/NodeRefSPtr.h"
 #include "vsutl/PlaneProcCbInterface.h"
 #include "vsutl/PlaneProcessor.h"
-#include "VapourSynth.h"
+#include "vswrap.h"
 
 #include <memory>
 
@@ -108,13 +108,12 @@ private:
 	               _logc_ei_s;
 	fmtcl::TransOpLogC::ExpIdx
 	               _logc_ei_d;
-	bool           _loglut_flag;
 
 	vsutl::PlaneProcessor
 	               _plane_processor;
 
-	std::unique_ptr <fmtcl::TransLut>
-	               _lut_uptr;
+	std::unique_ptr <fmtcl::TransModel>
+	               _model_uptr;
 
 
 

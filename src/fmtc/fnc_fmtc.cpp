@@ -29,7 +29,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtcl/MatrixProc.h"
 #include "vsutl/FilterBase.h"
 #include "vsutl/fnc.h"
-#include "VapourSynth.h"
+#include "vswrap.h"
 
 #include <algorithm>
 
@@ -127,6 +127,28 @@ fmtcl::ColorFamily	conv_vsfmt_to_colfam (const ::VSFormat &fmt)
 
 
 
+int	conv_fmtcl_colfam_to_vs (fmtcl::ColorFamily cf)
+{
+	assert (cf >= 0);
+	assert (cf < fmtcl::ColorFamily_NBR_ELT);
+
+	int            vs_cf = ::cfUndefined;
+	switch (cf)
+	{
+	case fmtcl::ColorFamily_GRAY:  vs_cf = ::cmGray;  break;
+	case fmtcl::ColorFamily_RGB:   vs_cf = ::cmRGB;   break;
+	case fmtcl::ColorFamily_YCGCO: vs_cf = ::cmYCoCg; break;
+	case fmtcl::ColorFamily_YUV:   vs_cf = ::cmYUV;   break;
+	default:
+		assert (false);
+		break;
+	}
+
+	return vs_cf;
+}
+
+
+
 void	prepare_matrix_coef (const vsutl::FilterBase &filter, fmtcl::MatrixProc &mat_proc, const fmtcl::Mat4 &mat_main, const ::VSFormat &fmt_dst, bool full_range_dst_flag, const ::VSFormat &fmt_src, bool full_range_src_flag, fmtcl::ColorSpaceH265 csp_out, int plane_out)
 {
 	const fmtcl::PicFmt  fmt_src_fmtcl =
@@ -166,6 +188,29 @@ void	prepare_matrix_coef (const vsutl::FilterBase &filter, fmtcl::MatrixProc &ma
 			);
 		}
 	}
+}
+
+
+
+fmtcl::ProcComp3Arg	build_mat_proc (const ::VSAPI &vsapi, ::VSFrameRef &dst, const ::VSFrameRef &src, bool single_plane_flag)
+{
+	fmtcl::ProcComp3Arg  pa;
+
+	pa._w = vsapi.getFrameWidth (&dst, 0);
+	pa._h = vsapi.getFrameHeight (&dst, 0);
+
+	for (int p_idx = 0; p_idx < fmtcl::ProcComp3Arg::_nbr_planes; ++p_idx)
+	{
+		if (! single_plane_flag || p_idx == 0)
+		{
+			pa._dst [p_idx]._ptr    = vsapi.getWritePtr (&dst, p_idx);
+			pa._dst [p_idx]._stride = vsapi.getStride (&dst, p_idx);
+		}
+		pa._src [p_idx]._ptr    = vsapi.getReadPtr (&src, p_idx);
+		pa._src [p_idx]._stride = vsapi.getStride (&src, p_idx);
+	}
+
+	return pa;
 }
 
 
