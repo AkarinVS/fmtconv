@@ -29,6 +29,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include "fstb/def.h"
 
+#include "fmtcl/Cst.h"
 #include "fmtcl/TransLut.h"
 #include "fmtcl/TransOpInterface.h"
 #include "fstb/fnc.h"
@@ -363,6 +364,56 @@ double	TransLut::MapperLog::find_val (int index) const noexcept
 
 
 
+// For float input. Only checks the curvature, not the extended range
+bool	TransLut::is_loglut_req (const TransOpInterface &curve)
+{
+	// Delta to compute the slope
+	constexpr double  delta = 1.0 / 65536;
+
+	// Slope at 1, for reference
+	// Curve may be clipping early because of contrast increase, so we
+	// try smaller values
+	double         x1 = 1;
+	double         s1 = 0;
+	do
+	{
+		const double   v1  = curve (x1);
+		const double   v1d = curve (x1 - delta);
+		s1 = (v1 - v1d) / delta;
+		x1 *= 0.5;
+	}
+	while (s1 <= 0 && x1 >= 0.01);
+	// At this point s1 may still be 0, we will ignore the result.
+
+	// Slope at 0
+	const double   v0  = curve (0);
+	const double   v0d = curve (0 + delta);
+	const double   s0  = (v0d - v0) / delta;
+	assert (s0 > 0);
+
+	// Arbitrary factor, seems to work decently
+	if (s1 > 0 && s0 >= 50 * s1)
+	{
+		return true;
+	}
+
+	// Slope close to 0
+	constexpr double  xs = 1.0 / 4096;
+	const double   vsn = curve (xs - delta * 0.5);
+	const double   vsp = curve (xs + delta * 0.5);
+	const double   ss  = (vsp - vsn) / delta;
+	assert (ss > 0);
+
+	if (s0 >= 3 * ss)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+
+
 /*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 
@@ -397,7 +448,7 @@ void	TransLut::generate_lut (const TransOpInterface &curve)
 
 	else
 	{
-		assert (! _loglut_flag);
+		_loglut_flag = false;
 
 		int            range = 1 << _src_bits;
 		if (_src_fmt == SplFmt_INT8)
@@ -408,8 +459,8 @@ void	TransLut::generate_lut (const TransOpInterface &curve)
 		{
 			_lut.resize (1 << 16);
 		}
-		const int      sb16  = (_src_full_flag) ? 0      :  16 << 8;
-		const int      sw16  = (_src_full_flag) ? 0xFFFF : 235 << 8;
+		const int      sb16  = (_src_full_flag) ? 0      : Cst::_rtv_lum_blk << 8;
+		const int      sw16  = (_src_full_flag) ? 0xFFFF : Cst::_rtv_lum_wht << 8;
 		int            sbn   = sb16 >> (16 - _src_bits);
 		int            swn   = sw16 >> (16 - _src_bits);
 		const int      sdif  = swn - sbn;
@@ -423,8 +474,8 @@ void	TransLut::generate_lut (const TransOpInterface &curve)
 		}
 		else
 		{
-			const int      db16 = (_dst_full_flag) ? 0      :  16 << 8;
-			const int      dw16 = (_dst_full_flag) ? 0xFFFF : 235 << 8;
+			const int      db16 = (_dst_full_flag) ? 0      : Cst::_rtv_lum_blk << 8;
+			const int      dw16 = (_dst_full_flag) ? 0xFFFF : Cst::_rtv_lum_wht << 8;
 			int            dbn  = db16 >> (16 - _dst_bits);
 			int            dwn  = dw16 >> (16 - _dst_bits);
 			const double   mul  = dwn - dbn;

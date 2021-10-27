@@ -47,21 +47,23 @@ public:
 	explicit       TransOpAcesCc (bool inv_flag);
 	virtual        ~TransOpAcesCc () {}
 
-	// TransOpInterface
-	virtual double operator () (double x) const;
-	virtual double get_max () const { return (65504); }
-
 
 
 /*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 protected:
 
+	// TransOpInterface
+	double         do_convert (double x) const override;
+	LinInfo        do_get_info () const override;
+
 
 
 /*\\\ PRIVATE \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 private:
+
+	static constexpr double _max_val = 65504.0;
 
 	const bool     _inv_flag;
 

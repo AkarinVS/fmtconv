@@ -49,16 +49,20 @@ TransOpFilmStream::TransOpFilmStream (bool inv_flag)
 
 
 
+/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
 // Linear 1 is the sensor clipping level (3840 on a linear 12-bit scale).
-double	TransOpFilmStream::operator () (double x) const
+double	TransOpFilmStream::do_convert (double x) const
 {
-	static const double  sc10    = 1024;
-	static const double  bl12    = 64;
-	static const double  wl12    = 3840;
-	static const double  mi10    =    3 / sc10;
-	static const double  ma10    = 1020 / sc10;
-	static const double  sp      = 500;
-	static const double  sl      = 0.02714;
+	constexpr double  sc10 = 1024;
+	constexpr double  bl12 =   64;
+	constexpr double  wl12 = 3840;
+	constexpr double  mi10 =    3 / sc10;
+	constexpr double  ma10 = 1020 / sc10;
+	constexpr double  sp   =  500;
+	constexpr double  sl   =    0.02714;
 
 	double         y = x;
 	if (_inv_flag)
@@ -81,12 +85,17 @@ double	TransOpFilmStream::operator () (double x) const
 		}
 	}
 
-	return (y);
+	return y;
 }
 
 
 
-/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+TransOpInterface::LinInfo	TransOpFilmStream::do_get_info () const
+{
+	// R, G and B sensors don't have the same sensitivity, so white level
+	// has no real meaning here.
+	return { Type::OETF, Range::UNDEF, 1.0, 1.0, 0.0, 0.0 };
+}
 
 
 

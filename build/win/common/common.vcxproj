@@ -205,6 +205,7 @@
     <ClInclude Include="..\..\..\src\fmtcl\GammaY.h" />
     <ClInclude Include="..\..\..\src\fmtcl\InterlacingType.h" />
     <ClInclude Include="..\..\..\src\fmtcl\KernelData.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\LumMatch.h" />
     <ClInclude Include="..\..\..\src\fmtcl\Mat3.h" />
     <ClInclude Include="..\..\..\src\fmtcl\Mat3.hpp" />
     <ClInclude Include="..\..\..\src\fmtcl\Mat4.h" />
@@ -212,6 +213,7 @@
     <ClInclude Include="..\..\..\src\fmtcl\Matrix2020CLProc.h" />
     <ClInclude Include="..\..\..\src\fmtcl\Matrix2020CLProc_macro.h" />
     <ClInclude Include="..\..\..\src\fmtcl\MatrixProc.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\MatXyz2Lms.h" />
     <ClInclude Include="..\..\..\src\fmtcl\Plane.hpp" />
     <ClInclude Include="..\..\..\src\fmtcl\PlaneRO.h" />
     <ClInclude Include="..\..\..\src\fmtcl\Plane.h" />
@@ -248,6 +250,7 @@
     <ClInclude Include="..\..\..\src\fmtcl\ScalerCopy.h" />
     <ClInclude Include="..\..\..\src\fmtcl\SplFmt.h" />
     <ClInclude Include="..\..\..\src\fmtcl\SplFmt.hpp" />
+    <ClInclude Include="..\..\..\src\fmtcl\TransCst.h" />
     <ClInclude Include="..\..\..\src\fmtcl\TransCurve.h" />
     <ClInclude Include="..\..\..\src\fmtcl\TransLut.h" />
     <ClInclude Include="..\..\..\src\fmtcl\TransModel.h" />
@@ -327,6 +330,7 @@
     <ClCompile Include="..\..\..\src\fmtcl\KernelData.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\Matrix2020CLProc.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\MatrixProc.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\MatXyz2Lms.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\ProcComp3Arg.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\MatrixProc_avx.cpp">
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
@@ -346,6 +350,7 @@
     <ClCompile Include="..\..\..\src\fmtcl\Scaler_avx2.cpp">
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtcl\TransCst.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\TransLut.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\TransLut_avx2.cpp">
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
@@ -358,6 +363,7 @@
     <ClCompile Include="..\..\..\src\fmtcl\TransOpErimm.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\TransOpFilmStream.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\TransOpHlg.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\TransOpInterface.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\TransOpLinPow.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\TransOpLogC.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\TransOpLogTrunc.cpp" />

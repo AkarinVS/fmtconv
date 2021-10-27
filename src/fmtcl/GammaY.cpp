@@ -214,16 +214,16 @@ GammaY::Op::Op (double gamma, double alpha)
 
 
 
-double	GammaY::Op::operator () (double x) const
+double	GammaY::Op::do_convert (double x) const
 {
 	return (x == 0) ? 0 : _alpha * pow (fabs (x), _gamma - 1);
 }
 
 
 
-double	GammaY::Op::get_max () const
+TransOpInterface::LinInfo	GammaY::Op::do_get_info () const
 {
-	return _alpha;
+	return { Type::UNDEF, Range::UNDEF, _alpha, 0 };
 }
 
 
@@ -297,10 +297,10 @@ void	GammaY::process_plane_cpp (Frame <> dst_arr, FrameRO <> src_arr, int w, int
 			// Computes Y (luminance) from the RGB data
 			for (int x = 0; x < blk_len; ++x)
 			{
-				const LumaTmpType r = s_arr [0]._ptr [x];
-				const LumaTmpType g = s_arr [1]._ptr [x];
-				const LumaTmpType b = s_arr [2]._ptr [x];
-				const auto        l = compute_luma (r, g, b);
+				const auto     r = LumaTmpType (s_arr [0]._ptr [x]);
+				const auto     g = LumaTmpType (s_arr [1]._ptr [x]);
+				const auto     b = LumaTmpType (s_arr [2]._ptr [x]);
+				const auto     l = compute_luma (r, g, b);
 				luma [x] = l;
 			}
 

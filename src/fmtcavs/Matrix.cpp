@@ -133,13 +133,14 @@ Matrix::Matrix (::IScriptEnvironment &env, const ::AVSValue &args)
 
 	// Matrix presets
 	std::string    mat (args [Param_MAT].AsString (""));
-	std::string    mats ((
-		fmt_src.get_col_fam () == fmtcl::ColorFamily_YUV ) ? mat : ""
-	);
-	std::string    matd (
-		(   fmt_dst.get_col_fam () == fmtcl::ColorFamily_YUV
-		 || fmt_dst.get_col_fam () == fmtcl::ColorFamily_GRAY) ? mat : ""
-	);
+	const bool     mats_default_flag =
+		(fmt_src.get_col_fam () == fmtcl::ColorFamily_YUV);
+	const bool     matd_default_flag =
+		(       fmt_dst.get_col_fam () == fmtcl::ColorFamily_YUV
+		 || (   fmt_dst.get_col_fam () == fmtcl::ColorFamily_GRAY
+		     && fmt_src.get_col_fam () != fmtcl::ColorFamily_YUV));
+	std::string    mats ((mats_default_flag) ? mat : "");
+	std::string    matd ((matd_default_flag) ? mat : "");
 	mats = args [Param_MATS].AsString (mats.c_str ());
 	matd = args [Param_MATD].AsString (matd.c_str ());
 	_csp_out = fmtcl::ColorSpaceH265_UNSPECIFIED;
@@ -169,15 +170,6 @@ Matrix::Matrix (::IScriptEnvironment &env, const ::AVSValue &args)
 		mat_main      = m2d * m2s;
 		mat_init_flag = true;
 	}
-
-	// Range
-	_fulls_flag     = args [Param_FULLS].AsBool (
-		fmtcl::is_full_range_default (fmt_src.get_col_fam ())
-	);
-	_fulld_flag     = args [Param_FULLD].AsBool (
-		fmtcl::is_full_range_default (fmt_dst.get_col_fam ())
-	);
-	_range_def_flag = args [Param_FULLD].Defined ();
 
 	// Alpha plane processing, if any
 	_proc_alpha_uptr = std::make_unique <fmtcavs::ProcAlpha> (
@@ -241,9 +233,15 @@ Matrix::Matrix (::IScriptEnvironment &env, const ::AVSValue &args)
 	}
 
 	// Sets the output colorspace accordingly
-	const auto     final_cf =
-		fmtcl::MatrixUtil::find_cf_from_cs (_csp_out, false);
-	fmt_dst.set_col_fam (final_cf);
+	if (_plane_out < 0)
+	{
+		if (_csp_out != fmtcl::ColorSpaceH265_UNSPECIFIED)
+		{
+			const auto     final_cf =
+				fmtcl::MatrixUtil::find_cf_from_cs (_csp_out, false);
+			fmt_dst.set_col_fam (final_cf);
+		}
+	}
 
 	// Checks the output colorspace
 	if (   fmt_dst.is_float ()     != fmt_src.is_float ()
@@ -261,6 +259,15 @@ Matrix::Matrix (::IScriptEnvironment &env, const ::AVSValue &args)
 	{
 		env.ThrowError (fmtcavs_MATRIX ": illegal output colorspace.");
 	}
+
+	// Range
+	_fulls_flag     = args [Param_FULLS].AsBool (
+		fmtcl::is_full_range_default (fmt_src.get_col_fam ())
+	);
+	_fulld_flag     = args [Param_FULLD].AsBool (
+		fmtcl::is_full_range_default (fmt_dst.get_col_fam ())
+	);
+	_range_def_flag = args [Param_FULLD].Defined ();
 
 	prepare_matrix_coef (
 		env, *_proc_uptr, mat_main,

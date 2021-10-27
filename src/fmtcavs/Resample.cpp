@@ -31,6 +31,8 @@ http://www.wtfpl.net/ for more details.
 #include "fmtcl/BitBltConv.h"
 #include "fmtcl/fnc.h"
 
+#include <stdexcept>
+
 #include <cassert>
 
 
@@ -174,7 +176,9 @@ Resample::Resample (::IScriptEnvironment &env, const ::AVSValue &args)
 		_clip_src_sptr,
 		avsutl::PlaneProcessor::ClipType_NORMAL
 	);
-	_plane_proc_uptr->set_proc_mode (args [Param_PLANES].AsString ("all"));
+	_plane_proc_uptr->set_proc_mode (
+		args [Param_PLANES], env, fmtcavs_RESAMPLE ", planes"
+	);
 
 	const auto     src_picfmt = conv_fmtavs_to_picfmt (_fmt_src, _fulls_flag);
 	const auto     dst_picfmt = conv_fmtavs_to_picfmt (_fmt_dst, _fulld_flag);
@@ -248,21 +252,21 @@ Resample::Resample (::IScriptEnvironment &env, const ::AVSValue &args)
 	// Per-plane parameters
 	const auto impulse   =
 		extract_array_f (env, args [Param_IMPULSE ], fmtcavs_RESAMPLE ", impulse");
-	auto impulse_h = args [Param_IMPULSEH].Defined ()
+	const auto impulse_h = is_array_defined (args [Param_IMPULSEH])
 		? extract_array_f (env, args [Param_IMPULSEH], fmtcavs_RESAMPLE ", impulseh")
 		: impulse;
-	const auto impulse_v = args [Param_IMPULSEV].Defined ()
+	const auto impulse_v = is_array_defined (args [Param_IMPULSEV])
 		? extract_array_f (env, args [Param_IMPULSEV], fmtcavs_RESAMPLE ", impulsev")
 		: impulse;
-	const bool a1_flag   = args [Param_A1 ].Defined ();
-	const bool a2_flag   = args [Param_A2 ].Defined ();
-	const bool a3_flag   = args [Param_A3 ].Defined ();
-	const bool a1_h_flag = args [Param_A1H].Defined ();
-	const bool a2_h_flag = args [Param_A2H].Defined ();
-	const bool a3_h_flag = args [Param_A3H].Defined ();
-	const bool a1_v_flag = args [Param_A1V].Defined ();
-	const bool a2_v_flag = args [Param_A2V].Defined ();
-	const bool a3_v_flag = args [Param_A3V].Defined ();
+	const bool a1_flag   = is_array_defined (args [Param_A1 ]);
+	const bool a2_flag   = is_array_defined (args [Param_A2 ]);
+	const bool a3_flag   = is_array_defined (args [Param_A3 ]);
+	const bool a1_h_flag = is_array_defined (args [Param_A1H]);
+	const bool a2_h_flag = is_array_defined (args [Param_A2H]);
+	const bool a3_h_flag = is_array_defined (args [Param_A3H]);
+	const bool a1_v_flag = is_array_defined (args [Param_A1V]);
+	const bool a2_v_flag = is_array_defined (args [Param_A2V]);
+	const bool a3_v_flag = is_array_defined (args [Param_A3V]);
 	const auto sx_arr         = extract_array_f (env, args [Param_SX        ], fmtcavs_RESAMPLE ", sx");
 	const auto sy_arr         = extract_array_f (env, args [Param_SY        ], fmtcavs_RESAMPLE ", sy");
 	const auto sw_arr         = extract_array_f (env, args [Param_SW        ], fmtcavs_RESAMPLE ", sw");
@@ -412,25 +416,36 @@ Resample::Resample (::IScriptEnvironment &env, const ::AVSValue &args)
 		}
 
 		// Serious stuff now
-		plane_data._kernel_arr [fmtcl::FilterResize::Dir_H].create_kernel (
-			kernel_fnc_h, impulse_h, taps_h,
-			(a1_flag || a1_h_flag), a1_h,
-			(a2_flag || a2_h_flag), a2_h,
-			(a3_flag || a3_h_flag), a3_h,
-			kovrspl,
-			invks_h_flag,
-			invks_taps_h
-		);
+		try
+		{
+			plane_data._kernel_arr [fmtcl::FilterResize::Dir_H].create_kernel (
+				kernel_fnc_h, impulse_h, taps_h,
+				(a1_flag || a1_h_flag), a1_h,
+				(a2_flag || a2_h_flag), a2_h,
+				(a3_flag || a3_h_flag), a3_h,
+				kovrspl,
+				invks_h_flag,
+				invks_taps_h
+			);
 
-		plane_data._kernel_arr [fmtcl::FilterResize::Dir_V].create_kernel (
-			kernel_fnc_v, impulse_v, taps_v,
-			(a1_flag || a1_v_flag), a1_v,
-			(a2_flag || a2_v_flag), a2_v,
-			(a3_flag || a3_v_flag), a3_v,
-			kovrspl,
-			invks_v_flag,
-			invks_taps_v
-		);
+			plane_data._kernel_arr [fmtcl::FilterResize::Dir_V].create_kernel (
+				kernel_fnc_v, impulse_v, taps_v,
+				(a1_flag || a1_v_flag), a1_v,
+				(a2_flag || a2_v_flag), a2_v,
+				(a3_flag || a3_v_flag), a3_v,
+				kovrspl,
+				invks_v_flag,
+				invks_taps_v
+			);
+		}
+		catch (const std::exception &e)
+		{
+			env.ThrowError (fmtcavs_RESAMPLE ": %s", e.what ());
+		}
+		catch (...)
+		{
+			env.ThrowError (fmtcavs_RESAMPLE ": failed to create kernel.");
+		}
 	}
 
 	create_all_plane_specs (_fmt_dst, _fmt_src);
@@ -445,6 +460,16 @@ Resample::Resample (::IScriptEnvironment &env, const ::AVSValue &args)
 
 	Ru::FieldBased prop_fieldbased = Ru::FieldBased_INVALID;
 	Ru::Field      prop_field      = Ru::Field_INVALID;
+
+	// Default property values based on VideoInfo
+	const bool     interlaced_flag = (vi.IsFieldBased () && vi.IsParityKnown ());
+	if (interlaced_flag)
+	{
+		const bool     top_flag = vi.IsTFF (); // or _src_clip_sptr->GetParity(n)?
+		prop_fieldbased = (top_flag) ? Ru::FieldBased_TFF : Ru::FieldBased_BFF;
+	}
+
+	// Now reads the existing frame properties
 	if (supports_props ())
 	{
 		const ::AVSMap *  props_ptr = env_ptr->getFramePropsRO (src_sptr);
@@ -452,14 +477,14 @@ Resample::Resample (::IScriptEnvironment &env, const ::AVSValue &args)
 		int64_t        prop_val = -1;
 		prop_val = env_ptr->propGetInt (props_ptr, "_FieldBased", 0, &err);
 		prop_fieldbased =
-				(err      != 0) ? Ru::FieldBased_INVALID
+			  (err      != 0) ? prop_fieldbased
 			: (prop_val == 0) ? Ru::FieldBased_FRAMES
 			: (prop_val == 1) ? Ru::FieldBased_BFF
 			: (prop_val == 2) ? Ru::FieldBased_TFF
 			:                   Ru::FieldBased_INVALID;
 		prop_val = env_ptr->propGetInt (props_ptr, "_Field", 0, &err);
 		prop_field =
-				(err      != 0) ? Ru::Field_INVALID
+			  (err      != 0) ? prop_field
 			: (prop_val == 0) ? Ru::Field_BOT
 			: (prop_val == 1) ? Ru::Field_TOP
 			:                   Ru::Field_INVALID;
@@ -508,6 +533,10 @@ Resample::Resample (::IScriptEnvironment &env, const ::AVSValue &args)
 			else if (_cplace_d == fmtcl::ChromaPlacement_MPEG1)
 			{
 				cl_val = 1; // Center
+			}
+			else if (_cplace_d == fmtcl::ChromaPlacement_T_L)
+			{
+				cl_val = 2; // Top-left
 			}
 
 			if (cl_val >= 0)

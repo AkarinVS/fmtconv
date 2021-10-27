@@ -42,19 +42,27 @@ namespace fmtcl
 
 
 
-TransOpPow::TransOpPow (bool inv_flag, double p_i, double alpha, double val_max)
+// p_i: power curve for the EOTF or OETF^-1 ( > 1)
+// alpha: scaling factor after EOTF^-1 or OETF
+TransOpPow::TransOpPow (bool inv_flag, double p_i, double alpha, double val_max, double scale_cdm2, double wpeak_cdm2)
 :	_inv_flag (inv_flag)
 ,	_p_i (p_i)
 ,	_alpha (alpha)
 ,	_p (1 / p_i)
 ,	_val_max (val_max)
+,	_scale_cdm2 (scale_cdm2)
+,	_wpeak_cdm2 (wpeak_cdm2)
 {
 	// Nothing
 }
 
 
 
-double	TransOpPow::operator () (double x) const
+/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+double	TransOpPow::do_convert (double x) const
 {
 	x = std::max (x, 0.0);
 	double         y = x;
@@ -70,12 +78,15 @@ double	TransOpPow::operator () (double x) const
 		y = _alpha * pow (x, _p);
 	}
 
-	return (y);
+	return y;
 }
 
 
 
-/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+TransOpInterface::LinInfo	TransOpPow::do_get_info () const
+{
+	return { Type::UNDEF, Range::SDR, _val_max, 1.0, _scale_cdm2, _wpeak_cdm2 };
+}
 
 
 

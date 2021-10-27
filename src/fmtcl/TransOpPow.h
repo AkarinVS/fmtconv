@@ -44,18 +44,18 @@ class TransOpPow
 
 public:
 
-	explicit       TransOpPow (bool inv_flag, double p_i, double alpha = 1, double val_max = 1);
+	explicit       TransOpPow (bool inv_flag, double p_i, double alpha = 1, double val_max = 1, double scale_cdm2 = 0, double wpeak_cdm2 = 0);
 	virtual        ~TransOpPow () {}
-
-	// TransOpInterface
-	virtual double operator () (double x) const;
-	virtual double get_max () const { return (_val_max); }
 
 
 
 /*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 protected:
+
+	// TransOpInterface
+	double         do_convert (double x) const override;
+	LinInfo        do_get_info () const override;
 
 
 
@@ -67,7 +67,9 @@ private:
 	const double   _p_i;
 	const double   _alpha;
 	const double   _p;
-	const double   _val_max;	// linear
+	const double   _val_max;      // linear
+	const double   _scale_cdm2;   // Value in cd/m^2 for linear 1.0. 0 = unknown
+	const double   _wpeak_cdm2;   // Value in cd/m^2 for linear 1.0. 0 = unknown
 
 
 

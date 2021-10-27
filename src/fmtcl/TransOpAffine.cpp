@@ -49,14 +49,14 @@ TransOpAffine::TransOpAffine (double a, double b)
 
 
 
-double	TransOpAffine::operator () (double x) const
-{
-	return (x * _a + _b);
-}
-
-
-
 /*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+double	TransOpAffine::do_convert (double x) const
+{
+	return x * _a + _b;
+}
 
 
 

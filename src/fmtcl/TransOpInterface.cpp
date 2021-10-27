@@ -1,6 +1,6 @@
 /*****************************************************************************
 
-        Cst_fmtcl.cpp
+        TransOpInterface.cpp
         Author: Laurent de Soras, 2021
 
 --- Legal stuff ---
@@ -24,7 +24,7 @@ http://www.wtfpl.net/ for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "fmtcl/Cst.h"
+#include "fmtcl/TransOpInterface.h"
 
 #include <cassert>
 
@@ -39,22 +39,32 @@ namespace fmtcl
 
 
 
-constexpr int	Cst::_max_nbr_planes;
+constexpr TransOpInterface::LinInfo	TransOpInterface::_unbounded;
 
-constexpr int	Cst::_rtv_imin;
-constexpr int	Cst::_rtv_emax;
-constexpr int	Cst::_rtv_lum_blk;
-constexpr int	Cst::_rtv_lum_wht;
-constexpr int	Cst::_rtv_chr_gry;
-constexpr int	Cst::_rtv_chr_dep;
+
+
+double	TransOpInterface::operator () (double x) const
+{
+	return do_convert (x);
+}
+
+
+
+TransOpInterface::LinInfo	TransOpInterface::get_info () const
+{
+	const auto     info = do_get_info ();
+
+	assert (info._vmax >= 1.0);
+	assert (info._wref > 0);
+	assert (info._scale_cdm2 >= 0);
+	assert (info._wpeak_cdm2 >= 0);
+
+	return info;
+}
 
 
 
 /*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
-
-
-/*\\\ PRIVATE \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 
 

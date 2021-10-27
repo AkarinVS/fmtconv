@@ -47,7 +47,11 @@ TransOpAcesCc::TransOpAcesCc (bool inv_flag)
 
 
 
-double	TransOpAcesCc::operator () (double x) const
+/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+double	TransOpAcesCc::do_convert (double x) const
 {
 	double         y = x;
 
@@ -59,13 +63,13 @@ double	TransOpAcesCc::operator () (double x) const
 		{
 			y = exp2 (x + 1) - 1.0 / (1 << 15);
 		}
-		else if (x <= log2 (65504))
+		else if (x <= log2 (_max_val))
 		{
 			y = exp2 (x    );
 		}
 		else
 		{
-			y = 65504;
+			y = _max_val;
 		}
 	}
 
@@ -87,16 +91,23 @@ double	TransOpAcesCc::operator () (double x) const
 		y /= 17.52;
 	}
 
-	return (y);
+	return y;
 }
 
 
 
-/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+TransOpInterface::LinInfo	TransOpAcesCc::do_get_info () const
+{
+	return { Type::UNDEF, Range::UNDEF, _max_val, 1.0, 0.0, 0.0 };
+}
 
 
 
 /*\\\ PRIVATE \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+constexpr double	TransOpAcesCc::_max_val;
 
 
 

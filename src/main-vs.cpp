@@ -579,9 +579,19 @@ VS_EXTERNAL_API (void) VapourSynthPluginInit (::VSConfigPlugin config_fnc, ::VSR
 		"flt:int:opt;"
 		"fulls:int:opt;"
 		"fulld:int:opt;"
+		"logceis:int:opt;"
+		"logceid:int:opt;"
 		"cpuopt:int:opt;"
 		"blacklvl:float:opt;"
-		"planes:float[]:opt;" // Masktools style
+		"sceneref:int:opt;"
+		"lb:float:opt;"
+		"lw:float:opt;"
+		"lws:float:opt;"
+		"lwd:float:opt;"
+		"ambient:float:opt;"
+		"match:int:opt;"
+		"gy:int:opt;"
+		"debug:int:opt;"
 		, &vsutl::Redirect <fmtc::Transfer>::create, 0, plugin_ptr
 	);
 

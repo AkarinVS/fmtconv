@@ -166,6 +166,7 @@ commonsrc = \
         ../../src/fmtcl/InterlacingType.h \
         ../../src/fmtcl/KernelData.cpp \
         ../../src/fmtcl/KernelData.h \
+        ../../src/fmtcl/LumMatch.h \
         ../../src/fmtcl/Mat3.h \
         ../../src/fmtcl/Mat3.hpp \
         ../../src/fmtcl/Mat4.h \
@@ -180,6 +181,8 @@ commonsrc = \
         ../../src/fmtcl/MatrixUtil.h \
         ../../src/fmtcl/MatrixWrap.h \
         ../../src/fmtcl/MatrixWrap.hpp \
+        ../../src/fmtcl/MatXyz2Lms.cpp \
+        ../../src/fmtcl/MatXyz2Lms.h \
         ../../src/fmtcl/PicFmt.h \
         ../../src/fmtcl/Plane.h \
         ../../src/fmtcl/Plane.hpp \
@@ -216,6 +219,8 @@ commonsrc = \
         ../../src/fmtcl/ScalerCopy.h \
         ../../src/fmtcl/SplFmt.h \
         ../../src/fmtcl/SplFmt.hpp \
+        ../../src/fmtcl/TransCst.cpp \
+        ../../src/fmtcl/TransCst.h \
         ../../src/fmtcl/TransCurve.h \
         ../../src/fmtcl/TransLut.cpp \
         ../../src/fmtcl/TransLut.h \
@@ -240,6 +245,7 @@ commonsrc = \
         ../../src/fmtcl/TransOpFilmStream.h \
         ../../src/fmtcl/TransOpHlg.cpp \
         ../../src/fmtcl/TransOpHlg.h \
+        ../../src/fmtcl/TransOpInterface.cpp \
         ../../src/fmtcl/TransOpInterface.h \
         ../../src/fmtcl/TransOpLinPow.cpp \
         ../../src/fmtcl/TransOpLinPow.h \

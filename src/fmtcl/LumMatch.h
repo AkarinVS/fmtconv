@@ -1,6 +1,6 @@
 /*****************************************************************************
 
-        Cst_fmtcl.cpp
+        LumMatch.h
         Author: Laurent de Soras, 2021
 
 --- Legal stuff ---
@@ -15,18 +15,13 @@ http://www.wtfpl.net/ for more details.
 
 
 
-#if defined (_MSC_VER)
-	#pragma warning (1 : 4130 4223 4705 4706)
-	#pragma warning (4 : 4355 4786 4800)
-#endif
+#pragma once
+#if ! defined (fmtcl_LumMatch_HEADER_INCLUDED)
+#define fmtcl_LumMatch_HEADER_INCLUDED
 
 
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
-#include "fmtcl/Cst.h"
-
-#include <cassert>
 
 
 
@@ -35,30 +30,30 @@ namespace fmtcl
 
 
 
-/*\\\ PUBLIC \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+enum LumMatch
+{
 
+	LumMatch_UNDEF = -1,
 
+	LumMatch_NONE  = 0,
+	LumMatch_REF_WHITE,
+	LumMatch_LUMINANCE,
 
-constexpr int	Cst::_max_nbr_planes;
+	LumMatch_NBR_ELT
 
-constexpr int	Cst::_rtv_imin;
-constexpr int	Cst::_rtv_emax;
-constexpr int	Cst::_rtv_lum_blk;
-constexpr int	Cst::_rtv_lum_wht;
-constexpr int	Cst::_rtv_chr_gry;
-constexpr int	Cst::_rtv_chr_dep;
-
-
-
-/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
-
-
-/*\\\ PRIVATE \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+}; // enum LumMatch
 
 
 
 }  // namespace fmtcl
+
+
+
+//#include "fmtcl/LumMatch.hpp"
+
+
+
+#endif   // fmtcl_LumMatch_HEADER_INCLUDED
 
 
 

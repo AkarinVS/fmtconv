@@ -51,7 +51,11 @@ TransOpLogTrunc::TransOpLogTrunc (bool inv_flag, double alpha, double beta)
 
 
 
-double	TransOpLogTrunc::operator () (double x) const
+/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+double	TransOpLogTrunc::do_convert (double x) const
 {
 	x = fstb::limit (x, 0.0, 1.0);
 	double         y = x;
@@ -72,12 +76,8 @@ double	TransOpLogTrunc::operator () (double x) const
 		}
 	}
 
-	return (y);
+	return y;
 }
-
-
-
-/*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 
 

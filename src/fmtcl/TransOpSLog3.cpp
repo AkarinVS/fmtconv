@@ -50,44 +50,53 @@ TransOpSLog3::TransOpSLog3 (bool inv_flag)
 
 
 
-double	TransOpSLog3::operator () (double x) const
-{
-	x = std::max (x, 0.0);
-	double         y = x;
-
-	if (_inv_flag)
-	{
-		if (x < 171.2102946929 / 1023.0)
-		{
-			y = (x * 1023.0 - 95.0) * 0.01125000 / (171.2102946929 - 95.0);
-		}
-		else
-		{
-			y = (pow (10, (x * 1023.0 - 420.0) / 261.5)) * (0.18 + 0.01) - 0.01;
-		}
-	}
-	else
-	{
-		if (x < 0.01125000)
-		{
-			y = (x * (171.2102946929 - 95.0) / 0.01125000 + 95.0) / 1023.0;
-		}
-		else
-		{
-			y = (420.0 + log10 ((x + 0.01) / (0.18 + 0.01)) * 261.5) / 1023.0;
-		}
-	}
-
-	return (y);
-}
-
-
-
 /*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 
 
+double	TransOpSLog3::do_convert (double x) const
+{
+	x = std::max (x, 0.0);
+
+	return (_inv_flag) ? log_to_lin (x) : lin_to_log (x);
+}
+
+
+
+TransOpInterface::LinInfo	TransOpSLog3::do_get_info () const
+{
+	return {
+		Type::UNDEF,
+		Range::UNDEF,
+		log_to_lin (1.0),
+		log_to_lin (598.0 / 1023.0),
+		0.0, 0.0
+	};
+}
+
+
+
 /*\\\ PRIVATE \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+
+
+double	TransOpSLog3::log_to_lin (double x)
+{
+	return
+		  (x < 171.2102946929 / 1023.0)
+		? (x * 1023.0 - 95.0) * 0.01125000 / (171.2102946929 - 95.0)
+		: (pow (10, (x * 1023.0 - 420.0) / 261.5)) * (0.18 + 0.01) - 0.01;
+}
+
+
+
+double	TransOpSLog3::lin_to_log (double x)
+{
+	return
+		  (x < 0.01125000)
+		? (x * (171.2102946929 - 95.0) / 0.01125000 + 95.0) / 1023.0
+		: (420.0 + log10 ((x + 0.01) / (0.18 + 0.01)) * 261.5) / 1023.0;
+}
 
 
 

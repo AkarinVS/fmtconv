@@ -1,6 +1,6 @@
 /*****************************************************************************
 
-        Cst_fmtcl.cpp
+        MatXyz2Lms.cpp
         Author: Laurent de Soras, 2021
 
 --- Legal stuff ---
@@ -24,7 +24,7 @@ http://www.wtfpl.net/ for more details.
 
 /*\\\ INCLUDE FILES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-#include "fmtcl/Cst.h"
+#include "fmtcl/MatXyz2Lms.h"
 
 #include <cassert>
 
@@ -39,14 +39,14 @@ namespace fmtcl
 
 
 
-constexpr int	Cst::_max_nbr_planes;
+constexpr Mat3	MatXyz2Lms::_vonkries_std;
+constexpr Mat3	MatXyz2Lms::_vonkries_alt;
+constexpr Mat3	MatXyz2Lms::_stockman_sharpe;
 
-constexpr int	Cst::_rtv_imin;
-constexpr int	Cst::_rtv_emax;
-constexpr int	Cst::_rtv_lum_blk;
-constexpr int	Cst::_rtv_lum_wht;
-constexpr int	Cst::_rtv_chr_gry;
-constexpr int	Cst::_rtv_chr_dep;
+constexpr Mat3	MatXyz2Lms::_bradford;
+constexpr Mat3	MatXyz2Lms::_ciecam97s;
+constexpr Mat3	MatXyz2Lms::_ciecam02;
+constexpr Mat3	MatXyz2Lms::_cam16;
 
 
 
