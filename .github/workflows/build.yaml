@@ -1,0 +1,66 @@
+name: fmtconv Build
+
+on:
+  release:
+    types: [created]
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1
+
+    - name: Install Windows 8.1 SDK
+      shell: powershell
+      run: |
+        Invoke-WebRequest -Method Get -Uri https://go.microsoft.com/fwlink/p/?LinkId=323507 -OutFile sdksetup.exe -UseBasicParsing
+        Start-Process -Wait sdksetup.exe -ArgumentList "/q", "/norestart", "/features", "OptionId.WindowsDesktopSoftwareDevelopmentKit", "OptionId.NetFxSoftwareDevelopmentKit"
+
+    - name: Build Solution
+      run: |
+        cd build\win
+        msbuild.exe fmtconv.sln /nologo /p:DeleteExistingFiles=True /p:platform="x64" /p:configuration="Release"
+        msbuild.exe fmtconv.sln /nologo /p:DeleteExistingFiles=True /p:platform="Win32" /p:configuration="Release"
+
+    - name: Package Release
+      shell: bash
+      run: |
+        cd "./build/win"
+        dir="release-$(git describe --tags --always)"
+        for arch in x64 Win32; do
+          for d in */Release${arch}; do
+            echo "d=$d"
+            dirname="$dir/$arch/$(dirname $d)"
+            echo "dirname=$dirname"
+            mkdir -p "$dirname"
+            for f in "$d"/*.dll "$d"/*.pdb; do
+              cp "$f" "$dirname" || true
+            done
+          done
+        done
+        cp -a ../../doc "$dir"/
+        git clone https://github.com/AkarinVS/exe/
+        exe/zip.exe -9r fmtconv-release.zip "$dir"/
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: fmtconv-release
+        path: "build/win/fmtconv-release.zip"
+
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: github.event_name == 'release'
+      with:
+        files: "build/win/fmtconv-release.zip"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
