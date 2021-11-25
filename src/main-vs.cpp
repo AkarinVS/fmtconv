@@ -519,6 +519,12 @@ VS_EXTERNAL_API (void) VapourSynthPluginInit (::VSConfigPlugin config_fnc, ::VSR
 		"tffd:int:opt;"
 		"flt:int:opt;"
 		"cpuopt:int:opt;"
+		"custom:func:opt;"
+		"custom_h:func:opt;"
+		"custom_v:func:opt;"
+		"support:float:opt;"
+		"support_h:float:opt;"
+		"support_v:float:opt;"
 		, &vsutl::Redirect <fmtc::Resample>::create, 0, plugin_ptr
 	);
 

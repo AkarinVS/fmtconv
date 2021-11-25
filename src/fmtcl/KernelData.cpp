@@ -29,6 +29,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 #include "fmtcl/ContFirBlackman.h"
 #include "fmtcl/ContFirBlackmanMinLobe.h"
 #include "fmtcl/ContFirCubic.h"
+#include "fmtcl/ContFirCustom.h"
 #include "fmtcl/ContFirFromDiscrete.h"
 #include "fmtcl/ContFirGauss.h"
 #include "fmtcl/ContFirLanczos.h"
@@ -70,10 +71,10 @@ uint32_t	KernelData::get_hash () const
 
 
 
-void	KernelData::create_kernel (std::string kernel_fnc, const std::vector <double> &coef_arr, int taps, bool a1_flag, double a1, bool a2_flag, double a2, bool a3_flag, double a3, int kovrspl, bool inv_flag, int inv_taps)
+void	KernelData::create_kernel (std::string kernel_fnc, const std::vector <double> &coef_arr, int taps, bool a1_flag, double a1, bool a2_flag, double a2, bool a3_flag, double a3, int kovrspl, bool inv_flag, int inv_taps, const std::function<double(double)> &custom, double support)
 {
 	hash_reset ();
-	create_kernel_base (kernel_fnc, coef_arr, taps, a1_flag, a1, a2_flag, a2, a3_flag, a3, kovrspl);
+	create_kernel_base (kernel_fnc, coef_arr, taps, a1_flag, a1, a2_flag, a2, a3_flag, a3, kovrspl, custom, support);
 	hash_val (int (inv_flag ? 0 : 1));
 	if (inv_flag)
 	{
@@ -92,7 +93,7 @@ void	KernelData::create_kernel (std::string kernel_fnc, const std::vector <doubl
 
 
 
-void	KernelData::create_kernel_base (std::string kernel_fnc, std::vector <double> coef_arr, int taps, bool a1_flag, double a1, bool a2_flag, double a2, bool a3_flag, double a3, int kovrspl)
+void	KernelData::create_kernel_base (std::string kernel_fnc, std::vector <double> coef_arr, int taps, bool a1_flag, double a1, bool a2_flag, double a2, bool a3_flag, double a3, int kovrspl, const std::function<double(double)> &custom, double support)
 {
 	fstb::unused (a3, a3_flag);
 
@@ -234,6 +235,13 @@ void	KernelData::create_kernel_base (std::string kernel_fnc, std::vector <double
 		_k_uptr = std::unique_ptr <ContFirInterface> (
 			new ContFirFromDiscrete (*_discrete_uptr)
 		);
+	}
+	else if (strcmp (name.c_str (), "custom") == 0)
+	{
+		hash_byte (KType_CUSTOM);
+		hash_val ((uintptr_t)&custom); // XXX: essentially random.
+		hash_val (support);
+		_k_uptr = std::unique_ptr <ContFirInterface> (new ContFirCustom (custom, support));
 	}
 	else
 	{

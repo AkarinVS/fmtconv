@@ -114,6 +114,8 @@ commonsrc = \
         ../../src/fmtcl/ContFirBlackmanMinLobe.h \
         ../../src/fmtcl/ContFirCubic.cpp \
         ../../src/fmtcl/ContFirCubic.h \
+        ../../src/fmtcl/ContFirCustom.cpp \
+        ../../src/fmtcl/ContFirCustom.h \
         ../../src/fmtcl/ContFirFromDiscrete.cpp \
         ../../src/fmtcl/ContFirFromDiscrete.h \
         ../../src/fmtcl/ContFirGauss.cpp \

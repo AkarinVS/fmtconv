@@ -422,7 +422,8 @@ Resample::Resample (::IScriptEnvironment &env, const ::AVSValue &args)
 				(a3_flag || a3_h_flag), a3_h,
 				kovrspl,
 				invks_h_flag,
-				invks_taps_h
+				invks_taps_h,
+				[](double) -> double { return 0; }, 0.0
 			);
 
 			plane_data._kernel_arr [fmtcl::FilterResize::Dir_V].create_kernel (
@@ -432,7 +433,8 @@ Resample::Resample (::IScriptEnvironment &env, const ::AVSValue &args)
 				(a3_flag || a3_v_flag), a3_v,
 				kovrspl,
 				invks_v_flag,
-				invks_taps_v
+				invks_taps_v,
+				[](double) -> double { return 0; }, 0.0
 			);
 		}
 		catch (const std::exception &e)

@@ -341,6 +341,10 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 		std::string    kernel_fnc     = get_arg_str (in, out, "kernel", "spline36", -plane_index);
 		std::string    kernel_fnc_h   = get_arg_str (in, out, "kernelh", ""       , -plane_index);
 		std::string    kernel_fnc_v   = get_arg_str (in, out, "kernelv", ""       , -plane_index);
+		bool           cust_flag, cust_h_flag, cust_v_flag;
+		std::function<double(double)> kernel_cust   = get_arg_func (in, out, "custom", -plane_index, &cust_flag);
+		std::function<double(double)> kernel_cust_h = get_arg_func (in, out, "custom_h", -plane_index, &cust_h_flag);
+		std::function<double(double)> kernel_cust_v = get_arg_func (in, out, "custom_v", -plane_index, &cust_v_flag);
 		const int      kovrspl        = get_arg_int (in, out, "kovrspl", 0   , -plane_index);
 		const int      taps           = get_arg_int (in, out, "taps"   , 4   , -plane_index);
 		const int      taps_h         = get_arg_int (in, out, "tapsh"  , taps, -plane_index);
@@ -348,6 +352,9 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 		bool           a1_flag, a1_h_flag, a1_v_flag;
 		bool           a2_flag, a2_h_flag, a2_v_flag;
 		bool           a3_flag, a3_h_flag, a3_v_flag;
+		const double   support_cust   = get_arg_flt (in, out, "support", -plane_index);
+		double         support_cust_h = get_arg_flt (in, out, "support_h", -plane_index);
+		double         support_cust_v = get_arg_flt (in, out, "support_v", -plane_index);
 		const double   a1             = get_arg_flt (in, out, "a1", 0.0, -plane_index, &a1_flag);
 		const double   a2             = get_arg_flt (in, out, "a2", 0.0, -plane_index, &a2_flag);
 		const double   a3             = get_arg_flt (in, out, "a3", 0.0, -plane_index, &a3_flag);
@@ -369,6 +376,30 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 		plane_data._kernel_scale_h    = get_arg_flt (in, out, "fh", 1.0, -plane_index);
 		plane_data._kernel_scale_v    = get_arg_flt (in, out, "fv", 1.0, -plane_index);
 		plane_data._preserve_center_flag = (get_arg_int (in, out, "center", 1, -plane_index) != 0);
+		if (cust_flag)
+		{
+			kernel_fnc = "custom";
+			if (support_cust <= 0)
+				throw_inval_arg ("custom kernel support invalid.");
+			if (!cust_h_flag && kernel_fnc_h.empty ()) {
+				kernel_fnc_h = "custom";
+				kernel_cust_h = kernel_cust;
+				support_cust_h = support_cust;
+			}
+			if (!cust_v_flag && kernel_fnc_v.empty ()) {
+				kernel_fnc_v = "custom";
+				kernel_cust_v = kernel_cust;
+				support_cust_v = support_cust;
+			}
+		}
+		if (cust_h_flag && support_cust_h <= 0)
+		{
+			throw_inval_arg ("custom kernel_h support invalid.");
+		}
+		if (cust_v_flag && support_cust_v <= 0)
+		{
+			throw_inval_arg ("custom kernel_v support invalid.");
+		}
 		if (kernel_fnc_h.empty ())
 		{
 			kernel_fnc_h = kernel_fnc;
@@ -414,7 +445,8 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 				(a3_flag || a3_h_flag), a3_h,
 				kovrspl,
 				invks_h_flag,
-				invks_taps_h
+				invks_taps_h,
+				kernel_cust_h, support_cust_h
 			);
 
 			plane_data._kernel_arr [fmtcl::FilterResize::Dir_V].create_kernel (
@@ -424,7 +456,8 @@ Resample::Resample (const ::VSMap &in, ::VSMap &out, void *user_data_ptr, ::VSCo
 				(a3_flag || a3_v_flag), a3_v,
 				kovrspl,
 				invks_v_flag,
-				invks_taps_v
+				invks_taps_v,
+				kernel_cust_v, support_cust_v
 			);
 		}
 		catch (const std::exception &e)

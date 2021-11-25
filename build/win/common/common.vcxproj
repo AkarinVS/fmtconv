@@ -176,6 +176,7 @@
     <ClInclude Include="..\..\..\src\fmtcl\ContFirBlackman.h" />
     <ClInclude Include="..\..\..\src\fmtcl\ContFirBlackmanMinLobe.h" />
     <ClInclude Include="..\..\..\src\fmtcl\ContFirCubic.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\ContFirCustom.h" />
     <ClInclude Include="..\..\..\src\fmtcl\ContFirFromDiscrete.h" />
     <ClInclude Include="..\..\..\src\fmtcl\ContFirGauss.h" />
     <ClInclude Include="..\..\..\src\fmtcl\ContFirInterface.h" />
@@ -311,6 +312,7 @@
     <ClCompile Include="..\..\..\src\fmtcl\ContFirBlackman.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\ContFirBlackmanMinLobe.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\ContFirCubic.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\ContFirCustom.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\ContFirFromDiscrete.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\ContFirGauss.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\ContFirInterface.cpp" />

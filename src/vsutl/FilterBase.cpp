@@ -30,6 +30,7 @@ http://sam.zoy.org/wtfpl/COPYING for more details.
 
 #include <algorithm>
 #include <stdexcept>
+#include <iostream>
 
 #include <cassert>
 #include <cstdio>
@@ -178,6 +179,73 @@ std::string	FilterBase::get_arg_str (const ::VSMap &in, ::VSMap &out, const char
 	return (def_val);
 }
 
+class CustomFunction {
+	const VSAPI &_api;
+	VSFuncRef *_func;
+
+	CustomFunction &operator=(const CustomFunction &rhs) = delete;
+	CustomFunction &operator=(CustomFunction &&rhs) = delete;
+public:
+	CustomFunction(const VSAPI &api, VSFuncRef *func) : _api(api), _func(func)
+	{
+	}
+	CustomFunction(const CustomFunction &rhs) : _api(rhs._api), _func(_api.cloneFuncRef(rhs._func))
+	{
+	}
+	CustomFunction(CustomFunction &&rhs) : _api(rhs._api), _func(rhs._func)
+	{
+		rhs._func = nullptr;
+	}
+	~CustomFunction()
+	{
+		if (_func) _api.freeFunc(_func);
+	}
+	double operator()(double x)
+	{
+		VSMap *_in = nullptr, *_out = nullptr;
+		_in = _api.createMap();
+		_out = _api.createMap();
+		_api.propSetFloat(_in, "x", x, paReplace);
+		_api.callFunc(_func, _in, _out, NULL, NULL);
+		_api.freeMap(_in);
+		const char *errmsg = _api.getError(_out);
+		if (errmsg) {
+			std::cerr << "resample: custom kernel error: " << errmsg << " at x = " <<
+				x << std::endl;
+			_api.freeMap(_out);
+			return 0.0;
+		}
+		int error = 0;
+		double y = _api.propGetFloat(_out, "val", 0, &error);
+		_api.freeMap(_out);
+		if (error != 0)
+			std::cerr << "resample: custom kernel did not return value for x = " << x << std::endl;
+		return y;
+	}
+};
+
+std::function<double(double)> FilterBase::get_arg_func (const ::VSMap &in, ::VSMap &out, const char name_0 [], int pos, bool *defined_ptr) const
+{
+	assert (name_0 != 0);
+
+	const bool     defined_flag = is_arg_defined (in, name_0);
+	if (defined_ptr != 0)
+	{
+		*defined_ptr = defined_flag;
+	}
+
+	if (defined_flag)
+	{
+		int            err = 0;
+		clip_neg_arg_pos (pos, in, name_0);
+		VSFuncRef *   tmp_0_ptr = _vsapi.propGetFunc (&in, name_0, pos, &err);
+		test_arg_err (out, name_0, err);
+		assert (tmp_0_ptr != 0);
+		return CustomFunction(_vsapi, tmp_0_ptr);
+	}
+
+	return [](double) -> double { return 0; };
+}
 
 
 std::vector <int>	FilterBase::get_arg_vint (const ::VSMap &in, ::VSMap &out, const char name_0 [], const std::vector <int> &def_val, bool *defined_ptr) const
