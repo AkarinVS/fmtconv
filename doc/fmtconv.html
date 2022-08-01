@@ -15,10 +15,10 @@
 
 <table class="n">
 <tr><td class="n"><b>Authors:     </b></td><td class="n">&nbsp;</td><td class="n">Firesledge (aka Cretindesalpes)</td></tr>
-<tr><td class="n"><b>Version:     </b></td><td class="n">&nbsp;</td><td class="n">r28</td></tr>
+<tr><td class="n"><b>Version:     </b></td><td class="n">&nbsp;</td><td class="n">r29</td></tr>
 <tr><td class="n"><b>Download:    </b></td><td class="n">&nbsp;</td><td class="n"><a href="http://ldesoras.free.fr/prod.html#src_fmtconv">http://ldesoras.free.fr/prod.html</a></td></tr>
 <tr><td class="n"><b>Category:    </b></td><td class="n">&nbsp;</td><td class="n">Format tools</td></tr>
-<tr><td class="n"><b>Requirements:</b></td><td class="n">&nbsp;</td><td class="n"><a href="http://www.vapoursynth.com/">Vapoursynth</a> or <a href="https://avs-plus.net/">Avisynth+ 3.7.0</a></td></tr>
+<tr><td class="n"><b>Requirements:</b></td><td class="n">&nbsp;</td><td class="n"><a href="http://www.vapoursynth.com/">Vapoursynth r55</a> or <a href="https://avs-plus.net/">Avisynth+ 3.7.0</a></td></tr>
 <tr><td class="n"><b>License:     </b></td><td class="n">&nbsp;</td><td class="n"><a href="http://www.wtfpl.net/">WTFPL</a></td></tr>
 </table>
 
@@ -251,7 +251,8 @@ make install</pre>
 <p>You can add some options to the <code>configure</code> command:</p>
 <ul>
 <li><code>--enable-debug</code> to activate debugging code</li>
-<li><code>--enable-clang</code> to use Clang instead of the default compiler which is usually GCC</li>
+<li><code>CXX='clang++' CC='clang'</code> to use Clang instead of the default
+compiler which is usually GCC</li>
 </ul>
 <p>Only the Vapoursynth plug-in can be built in the GNU-based environment.</p>
 
@@ -265,7 +266,7 @@ make install</pre>
 <tr>
 <td class="n"><pre class="proto">
 fmtc.bitdepth (
-	clip       : clip      ;
+	clip       : vnode     ;
 	csp        : int  : opt;
 	bits       : int  : opt;
 	flt        : int  : opt;
@@ -479,7 +480,7 @@ features.</p>
 <div style="width: 0; height: 0; visibility:hidden; display:none; overflow:hidden;">
 <pre class="proto">fmtc.convert (
 	# Input
-	clip       : clip        ;
+	clip       : vnode       ;
 
 	# Resizing/resampling
 	w          : int    : opt;
@@ -569,7 +570,7 @@ features.</p>
 <table class="n" width="100%">
 <tr>
 <td class="n"><pre class="proto">fmtc.matrix (
-	clip     : clip        ;
+	clip     : vnode       ;
 	mat      : data   : opt;
 	mats     : data   : opt;
 	matd     : data   : opt;
@@ -846,7 +847,7 @@ data range, it lies slightly below.</p>
 <table class="n" width="100%">
 <tr>
 <td class="n"><pre class="proto">fmtc.matrix2020cl (
-	clip    : clip      ;
+	clip    : vnode     ;
 	full    : int  : opt; (False)
 	csp     : int  : opt;
 	bits    : int  : opt;
@@ -947,7 +948,7 @@ Supersedes the bitdepth from <var>csp</var>.</p>
 <table class="n" width="100%">
 <tr>
 <td class="n"><pre class="proto">fmtc.primaries (
-	clip  : clip        ;
+	clip  : vnode       ;
 	rs    : float[]: opt;
 	gs    : float[]: opt;
 	bs    : float[]: opt;
@@ -1046,11 +1047,13 @@ Possible values are:</p>
 <tr><td><b><code>&quot;ciergb&quot;</code></b></td><td>R<br />G<br />B<br />W (E)</td><td>0.7347,<br />0.2738,<br />0.1666,<br />1 / 3</td><td>0.2653<br />0.7174<br />0.0089<br />1 / 3</td><td>CIE RGB (1931)</td></tr>
 <tr><td><b><code>&quot;ciexyz&quot;</code></b></td><td>R<br />G<br />B<br />W (E)</td><td>1.0,<br />0.0,<br />0.0,<br />1 / 3</td><td>0.0<br />1.0<br />0.0<br />1 / 3</td><td>CIE XYZ (1931)</td></tr>
 <tr><td><b><code>&quot;p3dci&quot;</code></b></td><td>R<br />G<br />B<br />W</td><td>0.680,<br />0.265,<br />0.150,<br />0.314</td><td>0.320<br />0.690<br />0.060<br />0.351</td><td>SMPTE ST 2113 P3-DCI<br />SMPTE RP 431-2</td></tr>
-<tr><td><b><code>&quot;p3d65&quot;</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.680,<br />0.265,<br />0.150,<br />0.3127</td><td>0.320<br />0.690<br />0.060<br />0.3290</td><td>SMPTE ST 2113 P3-D65<br />SMPTE EG 432-1</td></tr>
+<tr><td><b><code>&quot;p3d65&quot;</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.680,<br />0.265,<br />0.150,<br />0.3127</td><td>0.320<br />0.690<br />0.060<br />0.3290</td><td>SMPTE ST 2113 P3-D65<br />SMPTE EG 432-1<br />Apple Display P3</td></tr>
 <tr><td><b><code>&quot;p3d60&quot;</code></b></td><td>R<br />G<br />B<br />W (D60)</td><td>0.680,<br />0.265,<br />0.150,<br />0.32168</td><td>0.320<br />0.690<br />0.060<br />0.33767</td><td>ACES P3-D60</td></tr>
+<tr><td><b><code>&quot;p3p&quot;</code></b></td><td>R<br />G<br />B<br />W</td><td>0.740,<br />0.220,<br />0.090,<br />0.314,</td><td>0.270<br />0.780<br />&minus;0.090<br />0.351</td><td>DCI P3+</td></tr>
+<tr><td><b><code>&quot;cinegam&quot;</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.740,<br />0.170,<br />0.080,<br />0.3127,</td><td>0.270<br />1.140<br />&minus;0.100<br />0.329</td><td>Cinema Gamut</td></tr>
 <tr><td><b><code>&quot;3213&quot;</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.630,<br />0.295,<br />0.155,<br />0.3127</td><td>0.340<br />0.605<br />0.077<br />0.3290</td><td>EBU Tech. 3213-E</td></tr>
 <tr><td><b><code>&quot;aces&quot;</code></b></td><td>R<br />G<br />B<br />W (D60)</td><td>0.7347,<br />0.0,<br />0.0001,<br />0.32168,</td><td>0.2653<br />1.0<br />-0.077<br />0.33767</td><td>ACES<br />SMPTE ST 2065-1</td></tr>
-<tr><td><b><code>&quot;ap1&quot;</code></b></td><td>R<br />G<br />B<br />W (D60)</td><td>0.713,<br />0.165,<br />0.128,<br />0.32168,</td><td>0.293<br />0.830<br />-0.044<br />0.33767</td><td>ACEScc/ACESproxy AP1</td></tr>
+<tr><td><b><code>&quot;ap1&quot;<br />&quot;acescc&quot;<br />&quot;acescct&quot;</code></b></td><td>R<br />G<br />B<br />W (D60)</td><td>0.713,<br />0.165,<br />0.128,<br />0.32168,</td><td>0.293<br />0.830<br />-0.044<br />0.33767</td><td>ACESproxy AP1<br />ACEScc<br />ACEScct</td></tr>
 <tr><td><b><code>&quot;sgamut&quot;</code></b> or<br /><b><code>&quot;sgamut3&quot;</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.730,<br />0.140,<br />0.100,<br />0.3127</td><td>0.280<br />0.855<br />-0.050<br />0.3290</td><td>Sony S-Gamut<br />Sony S-Gamut3</td></tr>
 <tr><td><b><code>&quot;sgamut3cine&quot;</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.766,<br />0.225,<br />0.089,<br />0.3127</td><td>0.275<br />0.800<br />-0.087<br />0.3290</td><td>Sony S-Gamut3.Cine</td></tr>
 <tr><td><b><code>&quot;alexa&quot;</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.6840,<br />0.2210,<br />0.0861,<br />0.3127</td><td>0.3130<br />0.8480<br />-0.1020<br />0.3290</td><td>Arri ALEXA</td></tr>
@@ -1082,7 +1085,7 @@ Possible values are:</p>
 <table class="n" width="100%">
 <tr>
 <td class="n"><pre class="proto">fmtc.resample (
-	clip       : clip        ;
+	clip       : vnode       ;
 	w          : int    : opt;
 	h          : int    : opt;
 	sx         : float[]: opt; (0)
@@ -1622,7 +1625,7 @@ If it’s not the case, floating point operations are silently used as fallback.
 <table class="n" width="100%">
 <tr>
 <td class="n"><pre class="proto">fmtc.transfer (
-	clip    : clip        ;
+	clip    : vnode       ;
 	transs  : data[] : opt;
 	transd  : data[] : opt;
 	cont    : float  : opt;
@@ -1644,6 +1647,9 @@ If it’s not the case, floating point operations are silently used as fallback.
 	match   : int    : opt; (1)
 	gy      : int    : opt;
 	debug   : int    : opt; (0)
+	sig_c   : float  : opt; (6.5)
+	sig_t   : float  : opt; (0.5)
+
 )</pre></td>
 <td class="n"><pre class="proto">fmtc_transfer (
 	clip   c,
@@ -1667,7 +1673,9 @@ If it’s not the case, floating point operations are silently used as fallback.
 	float  ambient (undefined),
 	int    match (1),
 	bool   gy (undefined),
-	int    debug (0)
+	int    debug (0),
+	float  sig_c (6.5),
+	float  sig_t (0.5)
 )</pre></td>
 </tr>
 </table>
@@ -1711,12 +1719,12 @@ frame properties.</p>
 supported too, but the channel is left untouched.<p>
 
 <figure>
-<img src="transfer-diag-display.svg" alt="Processing diagram for the display-referred mode" />
+<img src="transfer-diag-display.svg" alt="Processing diagram for the display-referred mode" width="726" />
 <figcaption>Processing diagram for the display-referred mode.</figcaption>
 </figure>
 
 <figure>
-<img src="transfer-diag-scene.svg" alt="Processing diagram for the scene-referred mode" />
+<img src="transfer-diag-scene.svg" alt="Processing diagram for the scene-referred mode" width="726" />
 <figcaption>Processing diagram for the scene-referred mode</figcaption>
 </figure>
 
@@ -1755,11 +1763,11 @@ cd/m<sup>2</sup>, whereas scene-referred linear scales are arbitrary.</p>
 <tr><td><b><code>&quot;log316&quot;    </code></b></td><td>0&hellip;1</td><td></td><td></td><td>Logarithmic transfer characteristic (100&radic;10:1 range)</td></tr>
 <tr><td><b><code>&quot;61966-2-4&quot; </code></b></td><td>Unspecified</td><td>OETF</td><td>SDR</td><td>IEC 61966-2-4, xvYCC. Same as BT.709, but with an extended range, including negative values.</td></tr>
 <tr><td><b><code>&quot;1361&quot;      </code></b></td><td>&minus;0.25&hellip;1.33</td><td></td><td></td><td>ITU-R BT.1361 extended colour gamut system</td></tr>
-<tr><td><b><code>&quot;61966-2-1&quot;<br />&quot;srgb&quot;<br />&quot;sycc&quot;</code></b></td><td>0&hellip;1</td><td>EOTF</td><td>SDR</td><td>IEC 61966-2-1, sRGB or sYCC</td></tr>
+<tr><td><b><code>&quot;61966-2-1&quot;<br />&quot;srgb&quot;<br />&quot;sycc&quot;</code></b></td><td>0&hellip;1</td><td>EOTF</td><td>SDR</td><td>IEC 61966-2-1, sRGB or sYCC<br />Apple Display P3</td></tr>
 <tr><td><b><code>&quot;2020_10&quot;   </code></b></td><td>0&hellip;1</td><td></td><td>SDR</td><td>ITU-R BT.2020 for 10-bit system</td></tr>
 <tr><td><b><code>&quot;2020_12&quot;<br />&quot;2020&quot;</code></b></td><td>0&hellip;1</td><td></td><td>SDR</td><td>ITU-R BT.2020 for 12-bit system</td></tr>
 <tr><td><b><code>&quot;pq&quot;<br />&quot;2084&quot;</code></b></td><td>0&hellip;1</td><td>EOTF</td><td>HDR</td><td>SMPTE ST 2084 for 10, 12, 14 and 16-bit systems<br />ITU-R BT.2100-2 PQ (perceptual quantization)<br />Linear 1.0 is peak white and corresponds to a display luminance level of 10&nbsp;000 cd/m<sup>2</sup>. Reference white is 203 cd/m<sup>2</sup>.</td></tr>
-<tr><td><b><code>&quot;428&quot;<br />&quot;428-1&quot;</code></b></td><td>0&hellip;1</td><td></td><td>SDR</td><td>SMPTE ST 428-1<br />Linear 48&nbsp;/&nbsp;52.37 corresponds to a reference display luminance level of 48&nbsp;cd/m<sup>2</sup>.</td></tr>
+<tr><td><b><code>&quot;428&quot;<br />&quot;428-1&quot;</code></b></td><td>0&hellip;1</td><td></td><td>SDR</td><td>SMPTE ST 428-1, DCI-P3 (with XYZ values)<br />Linear 48&nbsp;/&nbsp;52.37 corresponds to a reference display luminance level of 48&nbsp;cd/m<sup>2</sup>.</td></tr>
 <tr><td><b><code>&quot;hlg&quot;       </code></b></td><td>0&hellip;1</td><td>OETF</td><td>HDR</td><td>ITU-R BT.2100 HLG (hybrid log-gamma), ARIB STD-B67<br />Reference white is at 75&nbsp;% of the coding range, giving 203&nbsp;cd/m<sup>2</sup> when peak white is set to 1000&nbsp;cd/m<sup>2</sup>. Set <var>lw</var> to specify explicitely the peak white luminance.</td></tr>
 <tr><td><b><code>&quot;1886&quot;      </code></b></td><td>0&hellip;1</td><td>EOTF</td><td>SDR</td><td>ITU-R BT.1886. Intended to mimicing a CRT display curve. Peak white is 100 cd/m<sup>2</sup>.</td></tr>
 <tr><td><b><code>&quot;1886a&quot;     </code></b></td><td>0&hellip;1</td><td>EOTF</td><td>SDR</td><td>ITU-R BT.1886, alternative approximation</td></tr>
@@ -1772,7 +1780,8 @@ cd/m<sup>2</sup>, whereas scene-referred linear scales are arbitrary.</p>
 <tr><td><b><code>&quot;canonlog&quot;  </code></b></td><td>0&hellip;8.00903</td><td>OETF</td><td></td><td>Canon-Log<br />Peak white is 8.00903 in linear scale and 1.08676 in compressed scale.</td></tr>
 <tr><td><b><code>&quot;adobergb&quot;  </code></b></td><td>0&hellip;1</td><td></td><td>SDR</td><td>Adobe RGB (1998 and Wide Gamut).<br />Reference white is 160&nbsp;cd/m<sup>2</sup>.</td></tr>
 <tr><td><b><code>&quot;romm&quot;      </code></b></td><td>0&hellip;1</td><td></td><td>SDR</td><td>ProPhoto, ROMM.<br />Reference white is 142&nbsp;cd/m<sup>2</sup>.</td></tr>
-<tr><td><b><code>&quot;acescc&quot;    </code></b></td><td>&minus;65504&hellip;65504</td><td></td><td></td><td>ACEScc. Values are actually bounded to the ACES 16-bit float range.</td></tr>
+<tr><td><b><code>&quot;acescc&quot;    </code></b></td><td>&minus;65504&hellip;65504</td><td>OETF</td><td></td><td>ACEScc. Values are actually bounded to the ACES 16-bit float range.</td></tr>
+<tr><td><b><code>&quot;acescct&quot;   </code></b></td><td>&minus;65504&hellip;65504</td><td>OETF</td><td></td><td>ACEScct. Values are actually bounded to the ACES 16-bit float range.</td></tr>
 <tr><td><b><code>&quot;erimm&quot;     </code></b></td><td>0&hellip;316.2</td><td>OETF</td><td></td><td>ERIMM</td></tr>
 <tr><td><b><code>&quot;vlog&quot;      </code></b></td><td>0&hellip;1</td><td></td><td></td><td>Panasonic V-Log</td></tr>
 <tr><td><b><code>&quot;davinci&quot;   </code></b></td><td>&minus;0.01&hellip;100</td><td>OETF</td><td></td><td>Blackmagic Design DaVinci Intermediate</td></tr>
@@ -1780,6 +1789,7 @@ cd/m<sup>2</sup>, whereas scene-referred linear scales are arbitrary.</p>
 <tr><td><b><code>&quot;redlog&quot;    </code></b></td><td>0&hellip;1</td><td></td><td></td><td>REDlog</td></tr>
 <tr><td><b><code>&quot;cineon&quot;    </code></b></td><td>&minus;0.006&hellip;13.522</td><td></td><td></td><td>Cineon and REDlogFilm</td></tr>
 <tr><td><b><code>&quot;panalog&quot;   </code></b></td><td>&minus;0.01&hellip;6.100</td><td></td><td></td><td>Panalog</td></tr>
+<tr><td><b><code>&quot;sigmoid&quot;   </code></b></td><td>Unspecified</td><td></td><td></td><td>Sigmoid curve applied on linear data</td></tr>
 </table>
 
 <p class="var">cont</p>
@@ -1910,6 +1920,20 @@ The name of the property is <code>"FmtcTransferDbg"</code> followed with the
 parameter value, so multiple calls to <code>transfer</code> can be checked
 simultaneously.</p>
 
+<p class="var">sig_c</p>
+<p>Curvature value for the sigmoid curve, in range 0.1–10.
+You can use the <code>"sigmoid"</code> curve instead of the
+<code>"linear"</code> one to prevent exagerated ringing when resizing in
+linear light.
+This is not a real transfer function but it fits well here in a workflow.
+The higher the curvature value, the more non-linear the function.
+The sigmoid curve with its parameters can be visualised
+<a href="https://www.desmos.com/calculator/7ypvqplvyl">here</a>.</p>
+
+<p class="var">sig_t</p>
+<p>Inflection point for the sigmoid curve, in range 0–1.
+The closer to 1, the more the curve looks like a standard power curve.</p>
+
 
 
 <h3><a id="stack16tonative"></a>stack16tonative, nativetostack16</h3>
@@ -1948,6 +1972,22 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 
 
 <h2><a id="changelog"></a>V) Changelog</h2>
+
+<p><b>r30, 2022-xx-xx</b></p>
+<ul>
+<li><code>transfer</code>: Added ACEScct transfer function.</li>
+<li><code>primaries</code>: Added DCI P3+ and Cinema Gamut presets.</li>
+<li>Changed the <code>configure</<code> options to compile with Clang.</li>
+</ul>
+
+<p><b>r29, 2022-04-11</b></p>
+<ul>
+<li>Vapoursynth: switched to API v4. Fmtconv now requires Vapoursynth r55 or later, API v3 is not supported anymore.</li>
+<li><code>resample</code>: Fixed degnerated cases with <var>invks</var> causing a crash. Thanks to Dogway for the report.</li>
+<li><code>resample</code>/Avisynth+: fixed frame property writing when only <var>cplaced</var> is defined, thanks to Dogway for the report.</li>
+<li><code>transfer</code>: Added sigmoid curve as a transfer function.</li>
+<li><code>transfer</code>: Fixed the float to integer path.</li>
+</ul>
 
 <p><b>r28, 2021-11-20</b></p>
 <ul>

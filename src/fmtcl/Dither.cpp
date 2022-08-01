@@ -216,7 +216,7 @@ Dither::Dither (
 
 
 
-void	Dither::process_plane (uint8_t *dst_ptr, int dst_stride, const uint8_t *src_ptr, int src_stride, int w, int h, int frame_index, int plane_index)
+void	Dither::process_plane (uint8_t *dst_ptr, ptrdiff_t dst_stride, const uint8_t *src_ptr, ptrdiff_t src_stride, int w, int h, int frame_index, int plane_index)
 {
 	assert (dst_ptr != nullptr);
 	assert (src_ptr != nullptr);
@@ -882,7 +882,7 @@ void	Dither::init_fnc_errdiff () noexcept
 
 
 
-void	Dither::dither_plane (uint8_t *dst_ptr, int dst_stride, const uint8_t *src_ptr, int src_stride, int w, int h, const BitBltConv::ScaleInfo &scale_info, int frame_index, int plane_index)
+void	Dither::dither_plane (uint8_t *dst_ptr, ptrdiff_t dst_stride, const uint8_t *src_ptr, ptrdiff_t src_stride, int w, int h, const BitBltConv::ScaleInfo &scale_info, int frame_index, int plane_index)
 {
 	assert (dst_ptr != nullptr);
 	assert (src_ptr != nullptr);
@@ -934,7 +934,7 @@ void	Dither::dither_plane (uint8_t *dst_ptr, int dst_stride, const uint8_t *src_
 				"cannot allocate memory for temporary buffer."
 			);
 		}
-		ed_buf_ptr->clear ((sc_flag) ? sizeof (float) : sizeof (int16_t));
+		ed_buf_ptr->clear (int ((sc_flag) ? sizeof (float) : sizeof (int16_t)));
 	}
 
 	switch (_dmode)

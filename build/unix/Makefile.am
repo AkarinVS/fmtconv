@@ -232,6 +232,8 @@ commonsrc = \
         ../../src/fmtcl/TransOp2084.h \
         ../../src/fmtcl/TransOpAcesCc.cpp \
         ../../src/fmtcl/TransOpAcesCc.h \
+        ../../src/fmtcl/TransOpAcesCct.cpp \
+        ../../src/fmtcl/TransOpAcesCct.h \
         ../../src/fmtcl/TransOpAffine.cpp \
         ../../src/fmtcl/TransOpAffine.h \
         ../../src/fmtcl/TransOpBypass.h \
@@ -263,6 +265,8 @@ commonsrc = \
         ../../src/fmtcl/TransOpPow.h \
         ../../src/fmtcl/TransOpPowOfs.cpp \
         ../../src/fmtcl/TransOpPowOfs.h \
+        ../../src/fmtcl/TransOpSigmoid.cpp \
+        ../../src/fmtcl/TransOpSigmoid.h \
         ../../src/fmtcl/TransOpSLog.cpp \
         ../../src/fmtcl/TransOpSLog.h \
         ../../src/fmtcl/TransOpSLog3.cpp \
@@ -296,8 +300,7 @@ commonsrc = \
 libfmtconv_la_SOURCES = $(commonsrc) \
         ../../src/main-vs.cpp \
         ../../src/types.h \
-        ../../src/VapourSynth.h \
-        ../../src/vswrap.h \
+        ../../src/VapourSynth4.h \
         ../../src/fmtc/Bitdepth_vs.cpp \
         ../../src/fmtc/Bitdepth.h \
         ../../src/fmtc/Convert.cpp \
@@ -346,6 +349,8 @@ fmtcltest_LDADD =
 noinst_LTLIBRARIES =
 
 fmtcltest_SOURCES =  $(commonsrc) \
+        ../../src/test/GenTestPat.cpp \
+        ../../src/test/GenTestPat.h \
         ../../src/test/main.cpp \
         ../../src/test/PrecalcVoidAndCluster.cpp \
         ../../src/test/PrecalcVoidAndCluster.h \
