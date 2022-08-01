@@ -173,15 +173,15 @@ std::string	FilterBase::get_arg_str (const ::VSMap &in, ::VSMap &out, const char
 
 class CustomFunction {
 	const VSAPI &_api;
-	VSFuncRef *_func;
+	VSFunction *_func;
 
 	CustomFunction &operator=(const CustomFunction &rhs) = delete;
 	CustomFunction &operator=(CustomFunction &&rhs) = delete;
 public:
-	CustomFunction(const VSAPI &api, VSFuncRef *func) : _api(api), _func(func)
+	CustomFunction(const VSAPI &api, VSFunction *func) : _api(api), _func(func)
 	{
 	}
-	CustomFunction(const CustomFunction &rhs) : _api(rhs._api), _func(_api.cloneFuncRef(rhs._func))
+	CustomFunction(const CustomFunction &rhs) : _api(rhs._api), _func(_api.addFunctionRef(rhs._func))
 	{
 	}
 	CustomFunction(CustomFunction &&rhs) : _api(rhs._api), _func(rhs._func)
@@ -190,17 +190,17 @@ public:
 	}
 	~CustomFunction()
 	{
-		if (_func) _api.freeFunc(_func);
+		if (_func) _api.freeFunction(_func);
 	}
 	double operator()(double x)
 	{
 		VSMap *_in = nullptr, *_out = nullptr;
 		_in = _api.createMap();
 		_out = _api.createMap();
-		_api.propSetFloat(_in, "x", x, paReplace);
-		_api.callFunc(_func, _in, _out, NULL, NULL);
+		_api.mapSetFloat(_in, "x", x, maReplace);
+		_api.callFunction(_func, _in, _out);
 		_api.freeMap(_in);
-		const char *errmsg = _api.getError(_out);
+		const char *errmsg = _api.mapGetError(_out);
 		if (errmsg) {
 			std::cerr << "resample: custom kernel error: " << errmsg << " at x = " <<
 				x << std::endl;
@@ -208,7 +208,7 @@ public:
 			return 0.0;
 		}
 		int error = 0;
-		double y = _api.propGetFloat(_out, "val", 0, &error);
+		double y = _api.mapGetFloat(_out, "val", 0, &error);
 		_api.freeMap(_out);
 		if (error != 0)
 			std::cerr << "resample: custom kernel did not return value for x = " << x << std::endl;
@@ -230,7 +230,7 @@ std::function<double(double)> FilterBase::get_arg_func (const ::VSMap &in, ::VSM
 	{
 		int            err = 0;
 		clip_neg_arg_pos (pos, in, name_0);
-		VSFuncRef *   tmp_0_ptr = _vsapi.propGetFunc (&in, name_0, pos, &err);
+		VSFunction *   tmp_0_ptr = _vsapi.mapGetFunction (&in, name_0, pos, &err);
 		test_arg_err (out, name_0, err);
 		assert (tmp_0_ptr != 0);
 		return CustomFunction(_vsapi, tmp_0_ptr);
