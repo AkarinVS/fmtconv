@@ -15,7 +15,7 @@
 
 <table class="n">
 <tr><td class="n"><b>Authors:     </b></td><td class="n">&nbsp;</td><td class="n">Firesledge (aka Cretindesalpes)</td></tr>
-<tr><td class="n"><b>Version:     </b></td><td class="n">&nbsp;</td><td class="n">r29</td></tr>
+<tr><td class="n"><b>Version:     </b></td><td class="n">&nbsp;</td><td class="n">r30</td></tr>
 <tr><td class="n"><b>Download:    </b></td><td class="n">&nbsp;</td><td class="n"><a href="http://ldesoras.free.fr/prod.html#src_fmtconv">http://ldesoras.free.fr/prod.html</a></td></tr>
 <tr><td class="n"><b>Category:    </b></td><td class="n">&nbsp;</td><td class="n">Format tools</td></tr>
 <tr><td class="n"><b>Requirements:</b></td><td class="n">&nbsp;</td><td class="n"><a href="http://www.vapoursynth.com/">Vapoursynth r55</a> or <a href="https://avs-plus.net/">Avisynth+ 3.7.0</a></td></tr>
@@ -129,7 +129,7 @@ c.set_output ()</pre>
 <p>Bobbing an interlaced stream (here, Top Field First):</p>
 
 <pre class="src">c = c.std.SeparateFields (tff=True)
-c = c.fmtc.resample (scalev=2, kernel="cubic", interlaced=True, interlacedd=False)</pre>
+c = c.fmtc.resample (scalev=2, kernel="cubic", interlaced=1, interlacedd=0)</pre>
 
 <p>Converting a progressive stream from YUV 4:2:2 to 4:2:0 and back to 8 bits:</p>
 
@@ -140,7 +140,7 @@ c = c.fmtc.bitdepth (bits=8)</pre>
 
 <pre class="src">tff = True
 c = c.std.SeparateFields (tff=tff)
-c = c.fmtc.resample (css="420", interlaced=True)
+c = c.fmtc.resample (css="420", interlaced=1)
 c = c.fmtc.bitdepth (bits=8)
 c = c.std.DoubleWeave (tff=tff)
 c = c.std.SelectEvery (cycle=2, offsets=0)</pre>
@@ -623,7 +623,7 @@ For meaningful results, convert to R’G’B’ then to linear RGB and use
 </code>primaries</code> to perform the intermediary conversion.</p>
 
 <p>The <code>_ColorRange</code> frame property is set if the <var>fulld</var>
-parameter has been explicitely defined.
+parameter has been explicitely defined or if a preset is used.
 If the destination colorspace is a standardized one (as deduced from the
 specified matrix), the <code>_Matrix</code> and <code>_ColorSpace</code>
 properties are set, otherwise they are deleted from the frame.</p>
@@ -959,6 +959,7 @@ Supersedes the bitdepth from <var>csp</var>.</p>
 	wd    : float[]: opt;
 	prims : data   : opt;
 	primd : data   : opt;
+	wconv : int    : opt; (False)
 	cpuopt: int    : opt; (-1)
 )</pre></td>
 <td class="n"><pre class="proto">fmtc_primaries (
@@ -973,6 +974,7 @@ Supersedes the bitdepth from <var>csp</var>.</p>
 	arrayf wd (undefined),
 	string prims (undefined),
 	string primd (undefined),
+	bool   wconv (False),
 	int    cpuopt (-1)
 )</pre></td>
 </tr>
@@ -1069,6 +1071,21 @@ Possible values are:</p>
 <tr><td><b><code>&quot;red4&quot;</code></b></td><td>R<br />G<br />B<br />W (D60)</td><td>0.70118,<br />0.30060,<br />0.14533,<br />0.32168,</td><td>0.32901<br />0.68379<br />0.05162<br />0.33767</td><td>REDcolor4</td></tr>
 <tr><td><b><code>&quot;redwide&quot;</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.780308,<br />0.121595,<br />0.095612,<br />0.3217,</td><td>0.304253<br />1.493994<br />&minus;0.084589<br />0.3290</td><td>REDWideGamutRGB</td></tr>
 </table>
+
+<p class="var">wconv</p>
+<p>Indicates we want a full conversion for the white point.</p>
+<p>If set to <code>False</code>, chromatic adaptation will be used, so the
+white will stay white on the destination illuminant and colors will be adapted
+to implement a real illuminant change.
+This is generally what you want when converting between gamuts: the eye adapts
+to the new white and colors should be matched accordingly.</p>
+<p>If set to <code>True</code>, the chromatic adaptation is bypassed.
+The white from the source colorspace will appear with a tint if the target
+colorspace has a different white point.
+Use this if you want to emulate what a picture displayed with a monitor using
+the source illuminant looks like on a display using the target illuminant.
+This is also what you want when converting to and from XYZ for further
+operations in this colorspace.</p>
 
 <p class="var">cpuopt</p>
 <p>Limits the CPU instruction set.
@@ -1275,7 +1292,7 @@ between the sampling points.</li>
 <p>Clip to be resized. Mandatory.
 Supported input formats:</p>
 <ul>
-<li>8-, 9-, 10-, 12-, 16- and 16-bit integer.</li>
+<li>8-, 9-, 10-, 12-, 14- and 16-bit integer.</li>
 <li>32-bit floating point.</li>
 <li>Any planar colorspace.</li>
 </ul>
@@ -1872,9 +1889,15 @@ The EOTF (source) function uses <var>lb</var> as brightness setting.</p>
 <p>Indicate the peak white levels in cd/m<sup>2</sup>.
 <var>lws</var> is for the source transfer function, and <var>lwd</var>
 for the destination one.
-These parameters are taken into account when display-referred transfer
-functions are used.
-Minimum <var>lw</var> value is 0.1&nbsp;cd/m<sup>2</sup>.
+These parameters are taken into account to scale the luminance when the
+following conditions are met:</p>
+<ul>
+<li>display-referred transfer functions are used,
+<li><var>match</var> is set to 2 (display luminance matching) and</li>
+<li>the EOTF shouldn’t specify any scale for the luminance (the cd/m² value
+for F’&nbsp;= 1.0).</li>
+</ul>
+<p>Minimum <var>lw</var> value is 0.1&nbsp;cd/m<sup>2</sup>.
 System gamma may be changed according to the <var>lw</var> parameter.
 Unless specified, HDR functions use a peak white of 1000&nbsp;cd/m<sup>2</sup>.
 Similarly, SDR and other functions use 100&nbsp;cd/m<sup>2</sup> by default.
@@ -1973,11 +1996,19 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 
 <h2><a id="changelog"></a>V) Changelog</h2>
 
-<p><b>r30, 2022-xx-xx</b></p>
+<p><b>r31, 202x-xx-xx</b></p>
 <ul>
+<li><code>resample</code>: fixed 14 to 16 bit AVX2 conversion path, thanks to NSQY for the report.</li>
+</ul>
+
+<p><b>r30, 2022-08-29</b></p>
+<ul>
+<li><code>matrix</code>: The <code>_ColorRange</code> frame property is now set when a matrix preset is used.</li>
 <li><code>transfer</code>: Added ACEScct transfer function.</li>
 <li><code>primaries</code>: Added DCI P3+ and Cinema Gamut presets.</li>
-<li>Changed the <code>configure</<code> options to compile with Clang.</li>
+<li><code>primaries</code>: Added <var>wconv</var> parameter for full conversion.</li>
+<li>Changed the <code>configure</code> options to compile with Clang.</li>
+<li>Updated datatypes in the examples.</li>
 </ul>
 
 <p><b>r29, 2022-04-11</b></p>
