@@ -332,6 +332,10 @@ PrimariesPreset	PrimUtil::conv_string_to_primaries (const std::string &str)
 	{
 		preset = PrimariesPreset_CINEGAM;
 	}
+	else if (   str == "awg4")
+	{
+		preset = PrimariesPreset_AWG4;
+	}
 
 	return preset;
 }

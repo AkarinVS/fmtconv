@@ -91,7 +91,7 @@ typedef enum VSSampleType {
 
 #define VS_MAKE_VIDEO_ID(colorFamily, sampleType, bitsPerSample, subSamplingW, subSamplingH) ((colorFamily << 28) | (sampleType << 24) | (bitsPerSample << 16) | (subSamplingW << 8) | (subSamplingH << 0))
 
-typedef enum VSPresetFormat {
+typedef enum VSPresetVideoFormat {
     pfNone = 0,
 
     pfGray8 = VS_MAKE_VIDEO_ID(cfGray, stInteger, 8, 0, 0),
@@ -145,7 +145,7 @@ typedef enum VSPresetFormat {
 
     pfRGBH = VS_MAKE_VIDEO_ID(cfRGB, stFloat, 16, 0, 0),
     pfRGBS = VS_MAKE_VIDEO_ID(cfRGB, stFloat, 32, 0, 0),
-} VSPresetFormat;
+} VSPresetVideoFormat;
 
 #undef VS_MAKE_VIDEO_ID
 
@@ -296,6 +296,12 @@ typedef enum VSRequestPattern {
     rpStrictSpatial = 2 /* Always (and only) requests frame n from input clip when generating output frame n, never requests frames beyond the end of the clip */
 } VSRequestPattern;
 
+typedef enum VSCacheMode {
+    cmAuto = -1,
+    cmForceDisable = 0,
+    cmForceEnable = 1
+} VSCacheMode;
+
 /* Core entry point */
 typedef const VSAPI *(VS_CC *VSGetVapourSynthAPI)(int version);
 
@@ -329,7 +335,7 @@ struct VSAPI {
     void (VS_CC *createAudioFilter)(VSMap *out, const char *name, const VSAudioInfo *ai, VSFilterGetFrame getFrame, VSFilterFree free, int filterMode, const VSFilterDependency *dependencies, int numDeps, void *instanceData, VSCore *core) VS_NOEXCEPT; /* output nodes are appended to the clip key in the out map */
     VSNode *(VS_CC *createAudioFilter2)(const char *name, const VSAudioInfo *ai, VSFilterGetFrame getFrame, VSFilterFree free, int filterMode, const VSFilterDependency *dependencies, int numDeps, void *instanceData, VSCore *core) VS_NOEXCEPT; /* same as createAudioFilter but returns a pointer to the VSNode directly or NULL on failure */
     int (VS_CC *setLinearFilter)(VSNode *node) VS_NOEXCEPT; /* Use right after create*Filter*, sets the correct cache mode for using the cacheFrame API and returns the recommended upper number of additional frames to cache per request */
-    void (VS_CC *setCacheMode)(VSNode *node, int mode) VS_NOEXCEPT; /* -1: default (auto), 0: force disable, 1: force enable, changing the cache mode also resets all options to their default */
+    void (VS_CC *setCacheMode)(VSNode *node, int mode) VS_NOEXCEPT; /* VSCacheMode, changing the cache mode also resets all options to their default */
     void (VS_CC *setCacheOptions)(VSNode *node, int fixedSize, int maxSize, int maxHistorySize) VS_NOEXCEPT; /* passing -1 means no change */
 
     void (VS_CC *freeNode)(VSNode *node) VS_NOEXCEPT;
@@ -462,11 +468,10 @@ struct VSAPI {
     /* Graph information */
 
     /* 
-     * NOT PART OF THE STABLE API!
      * These functions only exist to retrieve internal details for debug purposes and graph visualization
      * They will only only work properly when used on a core created with ccfEnableGraphInspection and are
-     * not safe to use concurrently with frame requests or other API functions
-     * NOT PART OF THE STABLE API!
+     * not safe to use concurrently with frame requests or other API functions. Because of this they are
+     * unsuitable for use in plugins and filters.
      */
     
     const char *(VS_CC *getNodeCreationFunctionName)(VSNode *node, int level) VS_NOEXCEPT; /* level=0 returns the name of the function that created the filter, specifying a higher level will retrieve the function above that invoked it or NULL if a non-existent level is requested */

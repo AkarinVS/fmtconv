@@ -66,7 +66,6 @@
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <BrowseInformation>true</BrowseInformation>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -273,6 +272,7 @@
     <ClInclude Include="..\..\..\src\fmtcl\TransOpLinPow.h" />
     <ClInclude Include="..\..\..\src\fmtcl\TransOpLog3G10.h" />
     <ClInclude Include="..\..\..\src\fmtcl\TransOpLogC.h" />
+    <ClInclude Include="..\..\..\src\fmtcl\TransOpLogC4.h" />
     <ClInclude Include="..\..\..\src\fmtcl\TransOpLogTrunc.h" />
     <ClInclude Include="..\..\..\src\fmtcl\TransOpPow.h" />
     <ClInclude Include="..\..\..\src\fmtcl\TransOpPowOfs.h" />
@@ -385,6 +385,7 @@
     <ClCompile Include="..\..\..\src\fmtcl\TransOpLinPow.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\TransOpLog3G10.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\TransOpLogC.cpp" />
+    <ClCompile Include="..\..\..\src\fmtcl\TransOpLogC4.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\TransOpLogTrunc.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\TransOpPow.cpp" />
     <ClCompile Include="..\..\..\src\fmtcl\TransOpPowOfs.cpp" />

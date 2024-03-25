@@ -3,7 +3,9 @@
         ContFirSpline.cpp
         Author: Laurent de Soras, 2012
 
-Natural cubic splines
+Natural cubic splines: derivatives are continuous up to order 2, excepted on
+the end points, where the 2nd derivative is 0 (but 1st derivative may not be
+0).
 Coefficient calculation taken from SplineResize 0.2 by Wilbert Dijkhof
 
 --- Legal stuff ---

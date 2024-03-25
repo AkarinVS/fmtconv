@@ -259,6 +259,8 @@ commonsrc = \
         ../../src/fmtcl/TransOpLog3G10.h \
         ../../src/fmtcl/TransOpLogC.cpp \
         ../../src/fmtcl/TransOpLogC.h \
+        ../../src/fmtcl/TransOpLogC4.cpp \
+        ../../src/fmtcl/TransOpLogC4.h \
         ../../src/fmtcl/TransOpLogTrunc.cpp \
         ../../src/fmtcl/TransOpLogTrunc.h \
         ../../src/fmtcl/TransOpPow.cpp \

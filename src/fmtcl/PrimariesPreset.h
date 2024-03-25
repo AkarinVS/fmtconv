@@ -78,6 +78,7 @@ enum PrimariesPreset
 	PrimariesPreset_REDWIDE,
 	PrimariesPreset_P3P,
 	PrimariesPreset_CINEGAM,
+	PrimariesPreset_AWG4,
 
 	PrimariesPreset_NBR_ELT_CUSTOM
 }; // enum PrimariesPreset

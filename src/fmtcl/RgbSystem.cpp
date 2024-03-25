@@ -301,6 +301,13 @@ void	RgbSystem::set (PrimariesPreset preset)
 		_rgb [2] = { 0.080 ,-0.100  };
 		_white   = { 0.3127, 0.329  };
 		break;
+	// https://www.arri.com/resource/blob/278790/bea879ac0d041a925bed27a096ab3ec2/2022-05-arri-logc4-specification-data.pdf
+	case PrimariesPreset_AWG4:
+		_rgb [0] = { 0.7347, 0.2653 };
+		_rgb [1] = { 0.1424, 0.8576 };
+		_rgb [2] = { 0.0991,-0.0308 };
+		_white   = { 0.3127, 0.3290 };
+		break;
 
 	default:
 		assert (false);

@@ -1070,6 +1070,7 @@ Possible values are:</p>
 <tr><td><b><code>&quot;red3&quot;</code></b></td><td>R<br />G<br />B<br />W (D60)</td><td>0.70118,<br />0.30060,<br />0.10815,<br />0.32168,</td><td>0.32901<br />0.68379<br />&minus;0.00869<br />0.33767</td><td>REDcolor3</td></tr>
 <tr><td><b><code>&quot;red4&quot;</code></b></td><td>R<br />G<br />B<br />W (D60)</td><td>0.70118,<br />0.30060,<br />0.14533,<br />0.32168,</td><td>0.32901<br />0.68379<br />0.05162<br />0.33767</td><td>REDcolor4</td></tr>
 <tr><td><b><code>&quot;redwide&quot;</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.780308,<br />0.121595,<br />0.095612,<br />0.3217,</td><td>0.304253<br />1.493994<br />&minus;0.084589<br />0.3290</td><td>REDWideGamutRGB</td></tr>
+<tr><td><b><code>&quot;awg4&quot;</code></b></td><td>R<br />G<br />B<br />W (D65)</td><td>0.7347,<br />0.1424,<br />0.0991,<br />0.3217,</td><td>0.2653<br />0.8576<br />&minus;0.0308<br />0.3290</td><td>Arri Wide Gamut 4</td></tr>
 </table>
 
 <p class="var">wconv</p>
@@ -1790,10 +1791,11 @@ cd/m<sup>2</sup>, whereas scene-referred linear scales are arbitrary.</p>
 <tr><td><b><code>&quot;1886a&quot;     </code></b></td><td>0&hellip;1</td><td>EOTF</td><td>SDR</td><td>ITU-R BT.1886, alternative approximation</td></tr>
 <tr><td><b><code>&quot;filmstream&quot;</code></b></td><td>0&hellip;1</td><td>OETF</td><td></td><td>Thomson FilmStream<br />Linear 1.0 is the sensor clipping level, corresponding to 3840 on a linear 12-bit scale.</td></tr>
 <tr><td><b><code>&quot;slog&quot;      </code></b></td><td>&minus;0.006&hellip;10</td><td>OETF</td><td></td><td>Sony S-Log<br />Linear 1.0 is the reference white, peak white is at 10.0.</td></tr>
-<tr><td><b><code>&quot;slog2&quot;      </code></b></td><td>&minus;0.0085&hellip;14.13</td><td>OETF</td><td></td><td>Sony S-Log 2<br />Linear 1.0 is the reference white, peak white is at 14.13.</td></tr>
+<tr><td><b><code>&quot;slog2&quot;     </code></b></td><td>&minus;0.0085&hellip;14.13</td><td>OETF</td><td></td><td>Sony S-Log 2<br />Linear 1.0 is the reference white, peak white is at 14.13.</td></tr>
 <tr><td><b><code>&quot;slog3&quot;     </code></b></td><td>0&hellip;38.421</td><td>OETF</td><td></td><td>Sony S-Log3.</td></tr>
 <tr><td><b><code>&quot;logc2&quot;     </code></b></td><td>Unspecified</td><td>OETF</td><td></td><td>Arri Log C Alexa 2.x, linear scene exposure<br />Peak white is 57.45 linear. The negative part of the range allows coding sensor noise. <var>logceis</var> and <var>logceid</var> set the Exposure Index (EI).</td></tr>
 <tr><td><b><code>&quot;logc3&quot;     </code></b></td><td>Unspecified</td><td>OETF</td><td></td><td>Arri Log C Alexa 3.x, linear scene exposure<br />Peak white is 55.08 linear. The negative part of the range allows coding sensor noise. <var>logceis</var> and <var>logceid</var> set the Exposure Index (EI).</td></tr>
+<tr><td><b><code>&quot;logc4&quot;     </code></b></td><td>Unspecified</td><td>OETF</td><td></td><td>Arri LogC4, linear scene exposure<br />Peak white is 469.80 but this is only a hardware limit.</td></tr>
 <tr><td><b><code>&quot;canonlog&quot;  </code></b></td><td>0&hellip;8.00903</td><td>OETF</td><td></td><td>Canon-Log<br />Peak white is 8.00903 in linear scale and 1.08676 in compressed scale.</td></tr>
 <tr><td><b><code>&quot;adobergb&quot;  </code></b></td><td>0&hellip;1</td><td></td><td>SDR</td><td>Adobe RGB (1998 and Wide Gamut).<br />Reference white is 160&nbsp;cd/m<sup>2</sup>.</td></tr>
 <tr><td><b><code>&quot;romm&quot;      </code></b></td><td>0&hellip;1</td><td></td><td>SDR</td><td>ProPhoto, ROMM.<br />Reference white is 142&nbsp;cd/m<sup>2</sup>.</td></tr>
@@ -1807,6 +1809,7 @@ cd/m<sup>2</sup>, whereas scene-referred linear scales are arbitrary.</p>
 <tr><td><b><code>&quot;cineon&quot;    </code></b></td><td>&minus;0.006&hellip;13.522</td><td></td><td></td><td>Cineon and REDlogFilm</td></tr>
 <tr><td><b><code>&quot;panalog&quot;   </code></b></td><td>&minus;0.01&hellip;6.100</td><td></td><td></td><td>Panalog</td></tr>
 <tr><td><b><code>&quot;sigmoid&quot;   </code></b></td><td>Unspecified</td><td></td><td></td><td>Sigmoid curve applied on linear data</td></tr>
+<tr><td><b><code>&quot;lstar&quot;     </code></b></td><td>0&hellip;unspecified</td><td></td><td></td><td>L* curve from CIELAB (L*a*b) and CIELUV (L*u*v*) 1976. Linear 1.0 is reference white, peak white is unspecified.</td></tr>
 </table>
 
 <p class="var">cont</p>
@@ -1999,6 +2002,9 @@ and 16-bit integer for <code>nativetostack16</code>.</p>
 <p><b>r31, 202x-xx-xx</b></p>
 <ul>
 <li><code>resample</code>: fixed 14 to 16 bit AVX2 conversion path, thanks to NSQY for the report.</li>
+<li><code>transfer</code>: Added L* transfer function.</li>
+<li><code>transfer</code>: Added Arri LogC4 transfer function.</li>
+<li><code>primaries</code>: Added Arri Wide Gamut 4 colorspace.</li>
 <li>Program path without x86 SIMD: fixed wrong conversions affecting a lot of functions (noticed on ARM/Apple). Thanks to SaltyChiang for the fix.</li>
 </ul>
 

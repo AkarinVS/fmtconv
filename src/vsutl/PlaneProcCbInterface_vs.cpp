@@ -44,7 +44,7 @@ int	PlaneProcCbInterface::process_plane (::VSFrame &dst, int n, int plane_index,
 	assert (n >= 0);
 	assert (plane_index >= 0);
 
-	return (do_process_plane (
+	return do_process_plane (
 		dst,
 		n,
 		plane_index,
@@ -54,7 +54,7 @@ int	PlaneProcCbInterface::process_plane (::VSFrame &dst, int n, int plane_index,
 		src_node1_sptr,
 		src_node2_sptr,
 		src_node3_sptr
-	));
+	);
 }
 
 

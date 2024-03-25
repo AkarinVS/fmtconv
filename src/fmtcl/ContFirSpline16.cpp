@@ -3,6 +3,9 @@
         ContFirSpline16.cpp
         Author: Laurent de Soras, 2011
 
+C0 continuity only, derivatives are not continuous.
+https://forum.doom9.org/showthread.php?t=147117
+
 --- Legal stuff ---
 
 This program is free software. It comes without any warranty, to

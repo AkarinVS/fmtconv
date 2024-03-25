@@ -73,6 +73,16 @@ public:
 
 	static constexpr double _bt2100_pq_lw  = 10000; // cd/m^2
 
+	// https://en.wikipedia.org/wiki/CIELAB_color_space
+	// https://www.color.org/chardata/rgb/ecirgb.xalter
+	static constexpr double _lstar_delta   = 6.0 / 29;
+	static constexpr double _lstar_delta2  = _lstar_delta * _lstar_delta;
+	static constexpr double _lstar_beta    = _lstar_delta * _lstar_delta2;
+	static constexpr double _lstar_power   = 1.0 / 3;
+	static constexpr double _lstar_yn      = 100;
+	static constexpr double _lstar_alpha   = 1 + 16 / _lstar_yn;
+	static constexpr double _lstar_slope   = _lstar_alpha / (3 * _lstar_delta2);
+
 
 
 /*\\\ PROTECTED \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/

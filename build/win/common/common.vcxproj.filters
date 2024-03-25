@@ -231,6 +231,9 @@
     <ClCompile Include="..\..\..\src\fmtcl\TransOpAcesCct.cpp">
       <Filter>fmtcl</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\fmtcl\TransOpLogC4.cpp">
+      <Filter>fmtcl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\avstp.h" />
@@ -766,6 +769,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\fstb\Vu32.hpp">
       <Filter>fstb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\fmtcl\TransOpLogC4.h">
+      <Filter>fmtcl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
